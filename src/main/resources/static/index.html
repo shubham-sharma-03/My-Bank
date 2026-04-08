@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank — Secure Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root { --navy: #0a1628; --blue: #1a6cff; --blue2: #0052e0; --cyan: #00d4ff; --white: #ffffff; --gray: #8896b0; --border: rgba(255,255,255,0.08); }
+        html, body { height: 100%; font-family: 'Sora', sans-serif; background: var(--navy); color: var(--white); overflow: hidden; }
+        .bg { position: fixed; inset: 0; z-index: 0; background: radial-gradient(ellipse 80% 60% at 20% 50%, #0d2a5e 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 20%, #001a3a 0%, transparent 55%), var(--navy); }
+        .bg::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(26,108,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(26,108,255,0.06) 1px, transparent 1px); background-size: 48px 48px; mask-image: radial-gradient(ellipse 70% 70% at 30% 50%, black 30%, transparent 80%); }
+        .orb { position: fixed; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+        .orb-1 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(26,108,255,0.25), transparent 70%); top: -80px; left: -80px; animation: drift 8s ease-in-out infinite alternate; }
+        .orb-2 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(0,212,255,0.15), transparent 70%); bottom: -60px; right: 10%; animation: drift 10s ease-in-out infinite alternate-reverse; }
+        @keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(20px,20px) scale(1.1); } }
+        .page { position: relative; z-index: 1; display: grid; grid-template-columns: 1fr 1fr; height: 100vh; }
+        .left { display: flex; flex-direction: column; justify-content: center; padding: 60px; }
+        .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 60px; }
+        .brand-icon { width: 44px; height: 44px; background: linear-gradient(135deg, var(--blue), var(--cyan)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+        .brand-name { font-size: 22px; font-weight: 700; }
+        .brand-name span { color: var(--cyan); }
+        .hero-tag { display: inline-block; background: rgba(26,108,255,0.15); border: 1px solid rgba(26,108,255,0.3); color: var(--cyan); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 6px 14px; border-radius: 20px; margin-bottom: 24px; }
+        .hero-title { font-size: clamp(32px,3vw,48px); font-weight: 700; line-height: 1.15; letter-spacing: -1.5px; margin-bottom: 20px; }
+        .hero-title span { background: linear-gradient(90deg, var(--blue), var(--cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-sub { font-size: 15px; color: var(--gray); line-height: 1.7; max-width: 380px; margin-bottom: 48px; }
+        .stats { display: flex; gap: 32px; }
+        .stat-item { display: flex; flex-direction: column; gap: 4px; }
+        .stat-num { font-size: 24px; font-weight: 700; letter-spacing: -1px; }
+        .stat-num span { color: var(--cyan); }
+        .stat-label { font-size: 12px; color: var(--gray); }
+        .right { display: flex; align-items: center; justify-content: center; padding: 40px; }
+        .card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); backdrop-filter: blur(20px); border-radius: 24px; padding: 44px 40px; width: 100%; max-width: 420px; animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: translateY(0); } }
+        .card-title { font-size: 26px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 6px; }
+        .card-sub { font-size: 14px; color: var(--gray); margin-bottom: 36px; }
+        .field { margin-bottom: 20px; }
+        .field label { display: block; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; color: var(--gray); text-transform: uppercase; margin-bottom: 8px; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+        .field input { width: 100%; padding: 14px 16px 14px 46px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 12px; color: var(--white); font-family: 'Sora', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; }
+        .field input::placeholder { color: rgba(255,255,255,0.2); }
+        .field input:focus { border-color: var(--blue); background: rgba(26,108,255,0.08); box-shadow: 0 0 0 3px rgba(26,108,255,0.12); }
+        .toggle-pw { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--gray); font-size: 16px; padding: 4px; }
+        .btn-primary { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--blue), var(--blue2)); border: none; border-radius: 12px; color: var(--white); font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: transform 0.15s, opacity 0.15s; box-shadow: 0 4px 24px rgba(26,108,255,0.35); display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-primary:hover { transform: translateY(-1px); }
+        .btn-primary.loading { opacity: 0.7; pointer-events: none; }
+        .divider { display: flex; align-items: center; gap: 12px; margin: 24px 0; color: var(--gray); font-size: 12px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+        .btn-secondary { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); border-radius: 12px; color: var(--white); font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+        .btn-secondary:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.04); }
+        .toast { display: none; align-items: center; gap: 10px; border-radius: 10px; padding: 12px 16px; margin-top: 16px; font-size: 13px; }
+        .toast.err { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.25); color: #ff8099; }
+        .toast.suc { background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.25); color: #00e5a8; }
+        .toast.show { display: flex; }
+        .spinner { width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 768px) { .page { grid-template-columns: 1fr; } .left { display: none; } .right { padding: 24px; } }
+    </style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<div class="page">
+    <div class="left">
+        <div class="brand">
+            <div class="brand-icon">🏦</div>
+            <div class="brand-name">My<span>Bank</span></div>
+        </div>
+        <div class="hero-tag">Enterprise Banking</div>
+        <h1 class="hero-title">Banking built for<br><span>the digital era</span></h1>
+        <p class="hero-sub">Secure, fast and reliable banking powered by enterprise-grade infrastructure. Your money, always in your control.</p>
+        <div class="stats">
+            <div class="stat-item"><div class="stat-num">₹<span>2.4B</span></div><div class="stat-label">Transactions</div></div>
+            <div class="stat-item"><div class="stat-num"><span>99.9</span>%</div><div class="stat-label">Uptime SLA</div></div>
+            <div class="stat-item"><div class="stat-num"><span>256</span>-bit</div><div class="stat-label">Encryption</div></div>
+        </div>
+    </div>
+
+    <div class="right">
+
+
+        <!-- LOGIN VIEW -->
+        <div id="loginView">
+            <div class="card-title">Welcome back 👋</div>
+            <div class="card-sub">Sign in to your account to continue</div>
+            <div class="field">
+                <label>Email Address</label>
+                <div class="input-wrap">
+                    <span class="input-icon">✉️</span>
+                    <input type="email" id="loginEmail" placeholder="you@example.com"/>
+                </div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="loginPassword" placeholder="Enter your password"/>
+                    <button class="toggle-pw" onclick="togglePw('loginPassword',this)" type="button">👁️</button>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="login()" id="loginBtn">Sign In →</button>
+            <div class="toast err" id="loginErr"><span>⚠️</span><span id="loginErrMsg"></span></div>
+            <div class="divider">or</div>
+            <button class="btn-secondary" onclick="show('reg')">Create a new account</button>
+        </div>
+
+        <!-- REGISTER VIEW -->
+        <div id="regView" style="display:none">
+            <div class="card-title">Create account ✨</div>
+            <div class="card-sub">Join MyBank in seconds</div>
+            <div class="field">
+                <label>Full Name</label>
+                <div class="input-wrap">
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="regName" placeholder="Your full name"/>
+                </div>
+            </div>
+            <div class="field">
+                <label>Email Address</label>
+                <div class="input-wrap">
+                    <span class="input-icon">✉️</span>
+                    <input type="email" id="regEmail" placeholder="you@example.com"/>
+                </div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="regPassword" placeholder="Choose a password"/>
+                    <button class="toggle-pw" onclick="togglePw('regPassword',this)" type="button">👁️</button>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="register()" id="regBtn">Create Account →</button>
+            <div class="toast err" id="regErr"><span>⚠️</span><span id="regErrMsg"></span></div>
+            <div class="toast suc" id="regSuc"><span>✅</span><span id="regSucMsg"></span></div>
+            <div class="divider">or</div>
+            <button class="btn-secondary" onclick="show('login')">Back to sign in</button>
+        </div>
+
+    </div>
+</div>
+</div>
+
+<p><b>Account Number:</b> <span id="selectedAccount">Select account</span></p>
+</div>
+<button onclick="toggleHistory()">📜 View Transaction History</button>
+
+<div id="historySection" style="display:none;">
+    <h3>Transaction History</h3>
+</div>
+<span style="color:${color}">₹${txn.amount}</span>
+<script>
+    function togglePw(id, btn) {
+        const el = document.getElementById(id);
+        el.type = el.type === 'password' ? 'text' : 'password';
+        btn.textContent = el.type === 'password' ? '👁️' : '🙈';
+    }
+
+    function show(view) {
+        document.getElementById('loginView').style.display = view === 'login' ? 'block' : 'none';
+        document.getElementById('regView').style.display   = view === 'reg'   ? 'block' : 'none';
+    }
+
+    function setToast(id, msg, show) {
+        document.getElementById(id).querySelector('span:last-child').textContent = msg;
+        document.getElementById(id).classList.toggle('show', show);
+    }
+
+    // ✅ LOGIN (FIXED API)
+    async function login() {
+        const email    = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+
+        setToast('loginErr', '', false);
+
+        if (!email || !password) {
+            setToast('loginErr', 'Please fill in all fields', true);
+            return;
+        }
+
+        const btn = document.getElementById('loginBtn');
+        btn.classList.add('loading');
+        btn.innerHTML = '<div class="spinner"></div> Signing in...';
+
+        try {
+            const res = await fetch('/api/auth/login', {   // ✅ FIXED HERE
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('userId', data.userId);
+
+                btn.innerHTML = '✅ Success!';
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 600);
+
+            } else {
+                const msg = await res.text();
+                setToast('loginErr', msg || 'Invalid email or password', true);
+                btn.classList.remove('loading');
+                btn.innerHTML = 'Sign In →';
+            }
+
+        } catch (e) {
+            setToast('loginErr', 'Network error — please try again', true);
+            btn.classList.remove('loading');
+            btn.innerHTML = 'Sign In →';
+        }
+    }
+
+    // ✅ REGISTER (FIXED API)
+    async function register() {
+        const name     = document.getElementById('regName').value.trim();
+        const email    = document.getElementById('regEmail').value.trim();
+        const password = document.getElementById('regPassword').value;
+
+        setToast('regErr', '', false);
+        setToast('regSuc', '', false);
+
+        if (!name || !email || !password) {
+            setToast('regErr', 'Please fill in all fields', true);
+            return;
+        }
+
+        const btn = document.getElementById('regBtn');
+        btn.classList.add('loading');
+        btn.innerHTML = '<div class="spinner"></div> Creating...';
+
+        try {
+            const res = await fetch('/api/auth/register', {   // ✅ FIXED HERE
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+
+            if (res.ok) {
+                setToast('regSuc', 'Account created! Signing you in...', true);
+                btn.innerHTML = '✅ Created!';
+
+                // ✅ AUTO LOGIN FIXED
+                setTimeout(async () => {
+                    const r2 = await fetch('/api/auth/login', {   // ✅ FIXED HERE
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    if (r2.ok) {
+                        const d = await r2.json();
+                        localStorage.setItem('token', d.token);
+                        localStorage.setItem('userId', d.userId);
+                        window.location.href = '/dashboard';
+                    } else {
+                        show('login');
+                    }
+                }, 1200);
+
+            } else {
+                const msg = await res.text();
+                setToast('regErr', msg || 'Registration failed', true);
+                btn.classList.remove('loading');
+                btn.innerHTML = 'Create Account →';
+            }
+
+        } catch (e) {
+            setToast('regErr', 'Network error — please try again', true);
+            btn.classList.remove('loading');
+            btn.innerHTML = 'Create Account →';
+        }
+    }
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            document.getElementById('regView').style.display === 'none'
+                ? login()
+                : register();
+        }
+    });
+</script>
+</body>
+</html>

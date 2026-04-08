@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MyBank — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+          --navy: #0a1628; --navy2: #0f2040; --panel: #0d1e38;
+          --blue: #1a6cff; --blue2: #0052e0; --cyan: #00d4ff;
+          --gold: #f0c040; --white: #ffffff; --gray: #8896b0;
+          --light: #c8d4e8; --border: rgba(255,255,255,0.07);
+          --card: rgba(255,255,255,0.04); --success: #00c896; --error: #ff4d6d;
+          --purple: #a855f7;
+        }
+        html, body { height: 100%; font-family: 'Sora', sans-serif; background: var(--navy); color: var(--white); }
+
+        /* Navbar */
+        .navbar { position: sticky; top: 0; z-index: 100; background: rgba(10,22,40,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+        .nav-brand { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .nav-brand span { color: var(--cyan); }
+        .nav-brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--blue), var(--cyan)); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .nav-right { display: flex; align-items: center; gap: 16px; }
+        .nav-user { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--gray); }
+        .nav-avatar { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(135deg, var(--blue), var(--cyan)); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; }
+        .btn-logout { padding: 8px 18px; background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.2); border-radius: 8px; color: #ff8099; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: background 0.2s, border-color 0.2s; }
+        .btn-logout:hover { background: rgba(255,77,109,0.18); border-color: rgba(255,77,109,0.4); }
+
+        /* Page */
+        .page { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        .page-title { font-size: 13px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 24px; }
+
+        /* Top Row */
+        .top-row { display: grid; grid-template-columns: 280px 1fr; gap: 20px; margin-bottom: 20px; }
+
+        /* Balance Card */
+        .balance-card { background: linear-gradient(135deg, #0d3a8a 0%, #0a2a6e 50%, #051a50 100%); border: 1px solid rgba(26,108,255,0.3); border-radius: 20px; padding: 28px; position: relative; overflow: hidden; animation: fadeIn 0.5s ease both; }
+        .balance-card::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(0,212,255,0.15), transparent 70%); border-radius: 50%; }
+        .balance-card::after { content: ''; position: absolute; bottom: -60px; left: -20px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(26,108,255,0.1), transparent 70%); border-radius: 50%; }
+        .balance-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); margin-bottom: 12px; }
+        .balance-amount { font-size: 38px; font-weight: 700; letter-spacing: -2px; margin-bottom: 4px; position: relative; z-index: 1; }
+        .balance-amount span { color: var(--cyan); }
+        .balance-sub { font-size: 12px; color: rgba(255,255,255,0.4); font-family: 'DM Mono', monospace; }
+        .balance-badge { display: inline-flex; align-items: center; gap: 6px; margin-top: 20px; background: rgba(0,200,150,0.15); border: 1px solid rgba(0,200,150,0.25); border-radius: 20px; padding: 5px 12px; font-size: 11px; color: var(--success); font-weight: 600; }
+
+        /* Stats Row */
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 20px; animation: fadeIn 0.5s ease both; }
+        .stat-card:nth-child(2) { animation-delay: 0.05s; }
+        .stat-card:nth-child(3) { animation-delay: 0.1s; }
+        .stat-card.add-account { cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+        .stat-card.add-account:hover { border-color: rgba(0,200,150,0.4); background: rgba(0,200,150,0.06); }
+        .stat-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 12px; }
+        .stat-icon.blue   { background: rgba(26,108,255,0.15); }
+        .stat-icon.cyan   { background: rgba(0,212,255,0.12); }
+        .stat-icon.green  { background: rgba(0,200,150,0.12); }
+        .stat-val  { font-size: 22px; font-weight: 700; letter-spacing: -0.8px; margin-bottom: 3px; }
+        .stat-lbl  { font-size: 12px; color: var(--gray); }
+        .stat-hint { font-size: 10px; color: var(--success); margin-top: 4px; }
+
+        /* Bottom Row */
+        .bottom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+        /* Section Card */
+        .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 28px; animation: fadeIn 0.6s ease both; }
+        .section-card:nth-child(2) { animation-delay: 0.1s; }
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+        .section-title { font-size: 15px; font-weight: 600; letter-spacing: -0.3px; }
+        .section-badge { font-size: 11px; color: var(--gray); background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; }
+
+        /* Account Items */
+        .account-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--border); }
+        .account-item:last-child { border-bottom: none; padding-bottom: 0; }
+        .acc-left { display: flex; align-items: center; gap: 12px; }
+        .acc-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, rgba(26,108,255,0.2), rgba(0,212,255,0.1)); border: 1px solid rgba(26,108,255,0.2); display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .acc-number { font-size: 13px; font-family: 'DM Mono', monospace; color: var(--light); margin-bottom: 2px; }
+        .acc-type { font-size: 11px; color: var(--gray); }
+        .acc-bal { font-size: 15px; font-weight: 600; letter-spacing: -0.5px; }
+        .acc-bal span { color: var(--cyan); }
+        .no-accounts { text-align: center; padding: 32px 0; color: var(--gray); font-size: 13px; }
+        .no-accounts p { margin-top: 8px; }
+
+        /* Create Account button */
+        .btn-create-acc { width: 100%; margin-top: 16px; padding: 11px; background: rgba(26,108,255,0.08); border: 1px dashed rgba(26,108,255,0.3); border-radius: 10px; color: var(--blue); font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+        .btn-create-acc:hover { background: rgba(26,108,255,0.15); border-color: rgba(26,108,255,0.5); }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; inset: 0; z-index: 200; background: rgba(0,0,0,0.65); backdrop-filter: blur(8px); align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal { background: #0d1e38; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 36px; width: 380px; animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1); }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+        .modal-sub { font-size: 13px; color: var(--gray); margin-bottom: 28px; }
+        .modal-footer { display: flex; gap: 10px; margin-top: 24px; }
+        .btn-cancel { flex: 1; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; color: var(--gray); font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; transition: background 0.2s; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.09); }
+        .btn-confirm { flex: 2; padding: 12px; background: linear-gradient(135deg, var(--blue), var(--blue2)); border: none; border-radius: 10px; color: white; font-family: 'Sora', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
+        .btn-confirm:hover { opacity: 0.9; }
+        .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Form Fields */
+        .field { margin-bottom: 16px; }
+        .field label { display: block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray); margin-bottom: 7px; }
+        .input-wrap { position: relative; }
+        .input-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 15px; pointer-events: none; }
+        .field input, .field select { width: 100%; padding: 12px 14px 12px 42px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 10px; color: var(--white); font-family: 'Sora', sans-serif; font-size: 13px; outline: none; transition: border-color 0.2s, background 0.2s, box-shadow 0.2s; appearance: none; }
+        .field input::placeholder { color: rgba(255,255,255,0.18); }
+        .field input:focus, .field select:focus { border-color: var(--blue); background: rgba(26,108,255,0.07); box-shadow: 0 0 0 3px rgba(26,108,255,0.1); }
+
+        /* Send Button */
+        .btn-send { width: 100%; padding: 13px; background: linear-gradient(135deg, var(--blue), var(--blue2)); border: none; border-radius: 10px; color: white; font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 4px; box-shadow: 0 4px 20px rgba(26,108,255,0.3); transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-send:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(26,108,255,0.4); }
+        .btn-send:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+        /* Toast */
+        .toast { display: none; align-items: center; gap: 10px; border-radius: 10px; padding: 11px 14px; margin-top: 14px; font-size: 13px; }
+        .toast.success { background: rgba(0,200,150,0.1); border: 1px solid rgba(0,200,150,0.25); color: #00e5a8; }
+        .toast.error   { background: rgba(255,77,109,0.1); border: 1px solid rgba(255,77,109,0.25); color: #ff8099; }
+        .toast.show { display: flex; }
+
+        .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+
+        /* ── Transaction History ── */
+        .history-toggle-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 16px 22px;
+            background: rgba(168,85,247,0.07);
+            border: 1px solid rgba(168,85,247,0.2);
+            border-radius: 16px;
+            color: #c084fc;
+            font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+            cursor: pointer; margin-bottom: 0;
+            transition: all 0.2s;
+        }
+        .history-toggle-btn:hover { background: rgba(168,85,247,0.13); border-color: rgba(168,85,247,0.4); }
+        .btn-left { display: flex; align-items: center; gap: 10px; }
+        .history-toggle-chevron { font-size: 11px; transition: transform 0.3s ease; display: inline-block; }
+        .history-toggle-chevron.open { transform: rotate(180deg); }
+
+        /* Collapsible wrapper */
+        .history-section {
+            overflow: hidden;
+            max-height: 0;
+            opacity: 0;
+            transition: max-height 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin-top 0.3s ease;
+            margin-top: 0;
+        }
+        .history-section.open {
+            max-height: 3000px;
+            opacity: 1;
+            margin-top: 16px;
+        }
+        .history-inner {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+        }
+
+        /* Summary chips */
+        .history-summary { display: flex; gap: 12px; margin-bottom: 20px; }
+        .summary-chip { flex: 1; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--border); background: rgba(255,255,255,0.03); }
+        .summary-chip-lbl { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); margin-bottom: 6px; }
+        .summary-chip-val { font-size: 18px; font-weight: 700; letter-spacing: -0.5px; }
+        .summary-chip-val.green { color: var(--success); }
+        .summary-chip-val.red   { color: #ff8099; }
+        .summary-chip-val.neutral { color: var(--cyan); }
+
+        /* Filter chips */
+        .history-filters { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .filter-chip {
+            padding: 7px 16px; border-radius: 20px; font-size: 12px; font-weight: 600;
+            border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+            color: var(--gray); cursor: pointer; transition: all 0.18s; font-family: 'Sora', sans-serif;
+        }
+        .filter-chip:hover { border-color: rgba(168,85,247,0.35); color: #c084fc; background: rgba(168,85,247,0.07); }
+        .filter-chip.active        { background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.45); color: #c084fc; }
+        .filter-chip.active-green  { background: rgba(0,200,150,0.1);   border-color: rgba(0,200,150,0.35);  color: var(--success); }
+        .filter-chip.active-red    { background: rgba(255,77,109,0.1);  border-color: rgba(255,77,109,0.35); color: #ff8099; }
+
+        /* Txn Table */
+        .txn-table { width: 100%; border-collapse: collapse; }
+        .txn-table thead tr { border-bottom: 1px solid var(--border); }
+        .txn-table thead th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--gray); text-align: left; padding: 0 12px 14px 12px; }
+        .txn-table thead th:last-child { text-align: right; }
+        .txn-table tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+        .txn-table tbody tr:last-child { border-bottom: none; }
+        .txn-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+        .txn-table td { padding: 14px 12px; vertical-align: middle; }
+
+        .txn-icon-cell { width: 48px; }
+        .txn-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .txn-icon.debit  { background: rgba(255,77,109,0.1); }
+        .txn-icon.credit { background: rgba(0,200,150,0.1); }
+
+        .txn-desc { font-size: 13px; font-weight: 600; color: var(--white); margin-bottom: 3px; }
+        .txn-meta { font-size: 11px; color: var(--gray); font-family: 'DM Mono', monospace; }
+        .txn-account-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-family: 'DM Mono', monospace; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 6px; padding: 2px 7px; color: var(--light); }
+
+        .txn-amount { font-size: 15px; font-weight: 700; text-align: right; letter-spacing: -0.5px; }
+        .txn-amount.debit  { color: #ff8099; }
+        .txn-amount.credit { color: var(--success); }
+        .txn-status { font-size: 10px; font-weight: 600; text-align: right; margin-top: 3px; }
+        .txn-status.completed { color: var(--success); }
+        .txn-status.pending   { color: var(--gold); }
+
+        /* Empty / Loading */
+        .history-empty { text-align: center; padding: 48px 0; color: var(--gray); }
+        .history-empty .big-icon { font-size: 48px; margin-bottom: 14px; }
+        .history-empty .empty-title { font-size: 15px; font-weight: 600; color: var(--light); margin-bottom: 6px; }
+        .history-empty p { font-size: 13px; }
+        .history-loading { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 40px 0; color: var(--gray); font-size: 13px; }
+
+        /* Pagination */
+        .pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+        .page-btn { width: 34px; height: 34px; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.04); color: var(--gray); font-family: 'Sora', sans-serif; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .page-btn:hover:not(:disabled) { border-color: rgba(168,85,247,0.4); color: #c084fc; }
+        .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .page-info { font-size: 12px; color: var(--gray); padding: 0 10px; }
+
+        @keyframes spin    { to { transform: rotate(360deg); } }
+        @keyframes fadeIn  { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 900px) { .top-row { grid-template-columns: 1fr; } .stats-row { grid-template-columns: 1fr 1fr; } .bottom-row { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) { .stats-row { grid-template-columns: 1fr; } .navbar { padding: 0 16px; } .page { padding: 20px 16px; } .history-summary { flex-direction: column; } .txn-account-pill { display: none; } }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+    <div class="nav-brand">
+        <div class="nav-brand-icon">🏦</div>
+        My<span>Bank</span>
+    </div>
+    <div class="nav-right">
+        <div class="nav-user">
+            <div class="nav-avatar" id="avatarInitial">U</div>
+            <span id="navUsername">Loading...</span>
+        </div>
+        <button class="btn-logout" onclick="logout()">Sign Out</button>
+    </div>
+</nav>
+
+<!-- Create Account Modal -->
+<div class="modal-overlay" id="createModal">
+    <div class="modal">
+        <div class="modal-title">➕ Create New Account</div>
+        <div class="modal-sub">A new bank account will be opened instantly</div>
+        <div class="field">
+            <label>Account Type</label>
+            <div class="input-wrap">
+                <span class="input-icon">🏦</span>
+                <select id="newAccountType">
+                    <option value="SAVINGS">Savings Account</option>
+                    <option value="CURRENT">Current Account</option>
+                </select>
+            </div>
+        </div>
+        <div class="field">
+            <label>Initial Deposit (₹)</label>
+            <div class="input-wrap">
+                <span class="input-icon">💰</span>
+                <input id="newInitialBalance" type="number" placeholder="0.00" min="0"/>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-confirm" id="createBtn" onclick="createAccount()">Create Account</button>
+        </div>
+    </div>
+</div>
+
+<!-- Page -->
+<div class="page">
+    <div class="page-title">Overview</div>
+
+    <!-- Top Row -->
+    <div class="top-row">
+        <div class="balance-card">
+            <div class="balance-label">Total Balance</div>
+            <div class="balance-amount">₹<span id="totalBalance">0</span></div>
+            <div class="balance-sub">across all accounts</div>
+            <div class="balance-badge">🟢 All accounts active</div>
+        </div>
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-icon blue">💳</div>
+                <div class="stat-val" id="accountCount">0</div>
+                <div class="stat-lbl">Accounts</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon cyan">🔄</div>
+                <div class="stat-val" id="txCount">0</div>
+                <div class="stat-lbl">Transfers</div>
+            </div>
+            <div class="stat-card add-account" onclick="openModal()">
+                <div class="stat-icon green">➕</div>
+                <div class="stat-val" style="font-size:16px">New</div>
+                <div class="stat-lbl">Add Account</div>
+                <div class="stat-hint">Click to create →</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Row -->
+    <div class="bottom-row">
+        <!-- Accounts -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title">Your Accounts</div>
+                <div class="section-badge" id="accBadge">Loading...</div>
+            </div>
+            <div id="accounts">
+                <div class="no-accounts">
+                    <div style="font-size:32px">⏳</div>
+                    <p>Loading accounts...</p>
+                </div>
+            </div>
+            <button class="btn-create-acc" onclick="openModal()">+ Create New Account</button>
+        </div>
+
+        <!-- Transfer -->
+        <div class="section-card">
+            <div class="section-header">
+                <div class="section-title">Transfer Money</div>
+                <div class="section-badge">Instant</div>
+            </div>
+            <div class="field">
+                <label>From Account</label>
+                <div class="input-wrap">
+                    <span class="input-icon">📤</span>
+                    <input id="from" placeholder="Your account number"/>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>To Account</label>
+                <div class="input-wrap">
+                    <span class="input-icon">📥</span>
+                    <input id="to" placeholder="Recipient account number"/>
+                </div>
+            </div>
+            <div class="field">
+                <label>Amount (₹)</label>
+                <div class="input-wrap">
+                    <span class="input-icon">💰</span>
+                    <input id="amount" type="number" placeholder="0.00" min="1"/>
+                </div>
+            </div>
+            <button class="btn-send" onclick="transfer()" id="sendBtn">Send Money →</button>
+            <div class="toast" id="transferToast">
+                <span id="toastIcon"></span>
+                <span id="toastMsg"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Toggle Button -->
+    <button class="history-toggle-btn" id="historyToggleBtn" onclick="toggleHistory()">
+        <div class="btn-left">
+            <span>📜</span>
+            <span>Transaction History</span>
+        </div>
+        <span class="history-toggle-chevron" id="historyChevron">▼</span>
+    </button>
+
+    <!-- History Section (smooth collapse) -->
+    <div class="history-section" id="historySection">
+        <div class="history-inner">
+
+            <!-- Summary -->
+            <div class="history-summary">
+                <div class="summary-chip">
+                    <div class="summary-chip-lbl">Total Transactions</div>
+                    <div class="summary-chip-val neutral" id="summaryTotal">—</div>
+                </div>
+                <div class="summary-chip">
+                    <div class="summary-chip-lbl">Total Sent</div>
+                    <div class="summary-chip-val red" id="summaryDebit">—</div>
+                </div>
+                <div class="summary-chip">
+                    <div class="summary-chip-lbl">Total Received</div>
+                    <div class="summary-chip-val green" id="summaryCredit">—</div>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="history-filters">
+                <button class="filter-chip active" id="filterAll"    onclick="setFilter('all')">All</button>
+                <button class="filter-chip"        id="filterDebit"  onclick="setFilter('debit')">💸 Sent</button>
+                <button class="filter-chip"        id="filterCredit" onclick="setFilter('credit')">💰 Received</button>
+            </div>
+
+            <!-- Table area -->
+            <div id="txnTableWrap">
+                <div class="history-loading">
+                    <div class="spinner" style="border-top-color:var(--purple)"></div>
+                    Loading transactions...
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div class="pagination" id="paginationWrap" style="display:none">
+                <button class="page-btn" id="prevBtn" onclick="changePage(-1)">‹</button>
+                <span class="page-info" id="pageInfo"></span>
+                <button class="page-btn" id="nextBtn" onclick="changePage(1)">›</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="receiverInfo" style="margin-top:8px;color:#00d4ff;font-size:13px;"></div>
+<script>
+    // ── Auth Guard ──
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = '/';
+
+    // ── Decode JWT ──
+    function parseToken() {
+        try { return JSON.parse(atob(token.split('.')[1])); }
+        catch { return {}; }
+    }
+    const payload       = parseToken();
+    const username      = payload.sub || 'User';
+    document.getElementById('navUsername').textContent   = username;
+    document.getElementById('avatarInitial').textContent = username.charAt(0).toUpperCase();
+
+    const currentUserId = localStorage.getItem('userId');
+
+    // ── Accounts ──
+    let userAccounts = [];
+    let accountsLoaded = false; // FIX: guard so history waits for accounts
+
+    async function loadAccounts() {
+        if (!currentUserId) {
+            document.getElementById('accounts').innerHTML = `<div class="no-accounts"><div style="font-size:32px">⚠️</div><p>Session expired — please log in again</p></div>`;
+            document.getElementById('accBadge').textContent = 'Error';
+            return;
+        }
+        try {
+            const res = await fetch(`/api/accounts/user/${currentUserId}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!res.ok) throw new Error('Failed');
+            const data = await res.json();
+            userAccounts   = data;
+            accountsLoaded = true; // FIX: mark loaded
+
+            let total = 0, html = '';
+            data.forEach(acc => {
+                total += Number(acc.balance);
+                html  += `
+                  <div class="account-item">
+                    <div class="acc-left">
+                      <div class="acc-icon">💳</div>
+                      <div>
+                        <div class="acc-number">${acc.accountNumber}</div>
+                        <div class="acc-type">${acc.accountType || 'Savings'}</div>
+                      </div>
+                    </div>
+                    <div class="acc-bal">₹<span>${Number(acc.balance).toLocaleString('en-IN')}</span></div>
+                  </div>`;
+            });
+
+            document.getElementById('accounts').innerHTML     = html || `<div class="no-accounts"><div style="font-size:32px">🏦</div><p>No accounts yet — create one!</p></div>`;
+            document.getElementById('totalBalance').textContent = total.toLocaleString('en-IN');
+            document.getElementById('accountCount').textContent = data.length;
+            document.getElementById('accBadge').textContent     = `${data.length} account${data.length !== 1 ? 's' : ''}`;
+
+        } catch {
+            document.getElementById('accounts').innerHTML = `<div class="no-accounts"><div style="font-size:32px">⚠️</div><p>Could not load accounts</p></div>`;
+            document.getElementById('accBadge').textContent = 'Error';
+            accountsLoaded = true; // FIX: still mark done so history doesn't hang
+        }
+    }
+
+    // ── Modal ──
+    function openModal()  { document.getElementById('createModal').classList.add('show'); }
+    function closeModal() { document.getElementById('createModal').classList.remove('show'); }
+    document.getElementById('createModal').addEventListener('click', e => {
+        if (e.target === document.getElementById('createModal')) closeModal();
+    });
+
+    // ── Create Account ──
+    async function createAccount() {
+        if (!currentUserId) { alert('Session expired. Please log in again.'); return; }
+        const accountType    = document.getElementById('newAccountType').value;
+        const initialBalance = parseFloat(document.getElementById('newInitialBalance').value) || 0;
+        const btn = document.getElementById('createBtn');
+        btn.disabled = true; btn.textContent = 'Creating...';
+        try {
+            const res = await fetch('/api/accounts/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ userId: parseInt(currentUserId), accountType, initialBalance })
+            });
+            if (res.ok) {
+                const acc = await res.json();
+                closeModal();
+                document.getElementById('newInitialBalance').value = '';
+                if (acc.accountNumber) document.getElementById('from').value = acc.accountNumber;
+                showToast('success', '✅', `Account ${acc.accountNumber} created!`);
+                await loadAccounts();
+                // FIX: refresh history if open after accounts reload
+                if (document.getElementById('historySection').classList.contains('open')) {
+                    currentPage = 1;
+                    loadTransactions();
+                }
+            } else {
+                const err = await res.text();
+                alert('Failed: ' + err);
+            }
+        } catch { alert('Network error'); }
+        finally { btn.disabled = false; btn.textContent = 'Create Account'; }
+    }
+
+    // ── Transfer ──
+    let txSessionCount = 0;
+    async function transfer() {
+        const fromVal  = document.getElementById('from').value.trim();
+        const toVal    = document.getElementById('to').value.trim();
+        const amtVal   = document.getElementById('amount').value;
+        document.getElementById('transferToast').className = 'toast';
+
+        if (!fromVal || !toVal || !amtVal) { showToast('error','⚠️','Please fill in all fields'); return; }
+        if (parseFloat(amtVal) <= 0)       { showToast('error','⚠️','Amount must be greater than ₹0'); return; }
+        if (fromVal === toVal)             { showToast('error','⚠️','Cannot transfer to same account'); return; }
+
+        const btn = document.getElementById('sendBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<div class="spinner"></div> Processing...';
+
+        try {
+            const res = await fetch('/api/transactions/transfer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                body: JSON.stringify({ fromAccount: fromVal, toAccount: toVal, amount: parseFloat(amtVal) })
+            });
+            if (res.ok) {
+                txSessionCount++;
+                document.getElementById('txCount').textContent = txSessionCount;
+                showToast('success','✅',`₹${parseFloat(amtVal).toLocaleString('en-IN')} sent successfully!`);
+                document.getElementById('from').value = '';
+                document.getElementById('to').value   = '';
+                document.getElementById('amount').value = '';
+                loadAccounts();
+
+                // FIX: refresh history if open
+                if (document.getElementById('historySection').classList.contains('open')) {
+                    currentPage = 1;
+                    loadTransactions();
+                }
+
+                btn.innerHTML = '✅ Sent!';
+                setTimeout(() => {
+                    btn.innerHTML = 'Send Money →';
+                    btn.disabled  = false; // FIX: re-enable after success timeout
+                }, 1600);
+            } else {
+                const msg = await res.text();
+                showToast('error','❌', msg || 'Transfer failed — check account numbers');
+                btn.disabled  = false;
+                btn.innerHTML = 'Send Money →';
+            }
+        } catch {
+            showToast('error','❌','Network error — please try again');
+            btn.disabled  = false;
+            btn.innerHTML = 'Send Money →';
+        }
+    }
+
+    function showToast(type, icon, msg) {
+        document.getElementById('toastIcon').textContent = icon;
+        document.getElementById('toastMsg').textContent  = msg;
+        document.getElementById('transferToast').className = `toast ${type} show`;
+    }
+
+    // ──────────────────────────────────────
+    // ── Transaction History ──
+    // ──────────────────────────────────────
+    let allTxns       = [];
+    let filteredTxns  = [];
+    let currentFilter = 'all';
+    let currentPage   = 1;
+    const PAGE_SIZE   = 8;
+    let historyLoaded = false;
+
+    // FIX: wait for accounts to be populated before fetching history
+    function toggleHistory() {
+        const section  = document.getElementById('historySection');
+        const chevron  = document.getElementById('historyChevron');
+        const isOpen   = section.classList.contains('open');
+
+        if (!isOpen) {
+            section.classList.add('open');
+            chevron.classList.add('open');
+            if (!historyLoaded) {
+                if (accountsLoaded) {
+                    loadTransactions();
+                } else {
+                    // Wait until accounts are done
+                    const poller = setInterval(() => {
+                        if (accountsLoaded) {
+                            clearInterval(poller);
+                            loadTransactions();
+                        }
+                    }, 100);
+                }
+            }
+        } else {
+            section.classList.remove('open');
+            chevron.classList.remove('open');
+        }
+    }
+
+    async function loadTransactions() {
+        document.getElementById('txnTableWrap').innerHTML = `
+            <div class="history-loading">
+                <div class="spinner" style="border-top-color:var(--purple)"></div>
+                Loading transactions...
+            </div>`;
+        document.getElementById('paginationWrap').style.display = 'none';
+
+        try {
+            let txns = [];
+
+            // Attempt 1: /api/transactions/user/{userId}
+            const res = await fetch(`/api/transactions/user/${currentUserId}`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+
+            if (res.ok) {
+                txns = await res.json();
+            } else {
+                // FIX: Attempt 2 — collect per-account; userAccounts is guaranteed loaded now
+                for (const acc of userAccounts) {
+                    try {
+                        const r = await fetch(`/api/transactions/history/${acc.accountNumber}`, {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
+                        if (r.ok) {
+                            const rows = await r.json();
+                            txns.push(...rows);
+                        }
+                    } catch { /* skip this account */ }
+                }
+                // Deduplicate by id
+                const seen = new Set();
+                txns = txns.filter(t => {
+                    const key = t.id ?? JSON.stringify(t);
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                });
+            }
+
+            // Sort newest first
+            txns.sort((a, b) => new Date(b.timestamp || b.createdAt || 0) - new Date(a.timestamp || a.createdAt || 0));
+            allTxns       = txns;
+            historyLoaded = true;
+            document.getElementById('txCount').textContent = txns.length;
+
+            computeSummary();
+            applyFilter(currentFilter);
+
+        } catch {
+            document.getElementById('txnTableWrap').innerHTML = `
+                <div class="history-empty">
+                    <div class="big-icon">⚠️</div>
+                    <div class="empty-title">Could not load transactions</div>
+                    <p>Check your network connection or try again</p>
+                </div>`;
+        }
+    }
+
+    function computeSummary() {
+        let totalDebit = 0, totalCredit = 0;
+        allTxns.forEach(t => {
+            const amt = parseFloat(t.amount) || 0;
+            if (isDebit(t)) totalDebit  += amt;
+            else            totalCredit += amt;
+        });
+        document.getElementById('summaryTotal').textContent  = allTxns.length;
+        document.getElementById('summaryDebit').textContent  = '₹' + totalDebit.toLocaleString('en-IN');
+        document.getElementById('summaryCredit').textContent = '₹' + totalCredit.toLocaleString('en-IN');
+    }
+
+    function isDebit(t) {
+        const userNums = userAccounts.map(a => a.accountNumber);
+        return userNums.includes(t.fromAccount || t.fromAccountNumber || '');
+    }
+
+    // FIX: setFilter fully resets chip classes before applying the active one
+    function setFilter(f) {
+        currentFilter = f;
+        currentPage   = 1;
+
+        // Reset all chips cleanly
+        document.getElementById('filterAll').className    = 'filter-chip';
+        document.getElementById('filterDebit').className  = 'filter-chip';
+        document.getElementById('filterCredit').className = 'filter-chip';
+
+        if (f === 'all')    document.getElementById('filterAll').classList.add('active');
+        if (f === 'debit')  document.getElementById('filterDebit').classList.add('active-red');
+        if (f === 'credit') document.getElementById('filterCredit').classList.add('active-green');
+
+        applyFilter(f);
+    }
+
+    function applyFilter(f) {
+        if      (f === 'debit')  filteredTxns = allTxns.filter(t =>  isDebit(t));
+        else if (f === 'credit') filteredTxns = allTxns.filter(t => !isDebit(t));
+        else                     filteredTxns = [...allTxns];
+        renderPage();
+    }
+
+    function renderPage() {
+        const total = filteredTxns.length;
+        const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+        if (currentPage > pages) currentPage = pages;
+
+        const start = (currentPage - 1) * PAGE_SIZE;
+        const slice = filteredTxns.slice(start, start + PAGE_SIZE);
+
+        if (total === 0) {
+            document.getElementById('txnTableWrap').innerHTML = `
+                <div class="history-empty">
+                    <div class="big-icon">🔍</div>
+                    <div class="empty-title">No transactions found</div>
+                    <p>Make a transfer to see it appear here</p>
+                </div>`;
+            document.getElementById('paginationWrap').style.display = 'none';
+            return;
+        }
+
+        const rows = slice.map(t => {
+            const debit   = isDebit(t);
+            const amt     = parseFloat(t.amount) || 0;
+            const sign    = debit ? '−' : '+';
+            const cls     = debit ? 'debit' : 'credit';
+            const icon    = debit ? '📤' : '📥';
+            const label   = debit ? 'Sent' : 'Received';
+            const from    = t.fromAccount || t.fromAccountNumber || '—';
+            const to      = t.toAccount   || t.toAccountNumber   || '—';
+            const dateStr = formatDate(t.timestamp || t.createdAt);
+            const status  = (t.status || 'COMPLETED').toUpperCase();
+
+            return `
+              <tr>
+                <td class="txn-icon-cell"><div class="txn-icon ${cls}">${icon}</div></td>
+                <td>
+                  <div class="txn-desc">${label}</div>
+                  <div class="txn-meta">${dateStr}</div>
+                </td>
+                <td>
+                  <div class="txn-account-pill">📤 ${from}</div>
+                  <div style="margin-top:4px"><div class="txn-account-pill">📥 ${to}</div></div>
+                </td>
+                <td>
+                  <div class="txn-amount ${cls}">${sign}₹${amt.toLocaleString('en-IN')}</div>
+                  <div class="txn-status ${status === 'COMPLETED' ? 'completed' : 'pending'}">${status === 'COMPLETED' ? '✓ Completed' : '⏳ ' + status}</div>
+                </td>
+              </tr>`;
+        }).join('');
+
+        document.getElementById('txnTableWrap').innerHTML = `
+          <table class="txn-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Transaction</th>
+                <th>Accounts</th>
+                <th style="text-align:right">Amount</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>`;
+
+        const wrap = document.getElementById('paginationWrap');
+        if (pages <= 1) { wrap.style.display = 'none'; return; }
+        wrap.style.display = 'flex';
+        document.getElementById('prevBtn').disabled = currentPage === 1;
+        document.getElementById('nextBtn').disabled = currentPage === pages;
+        document.getElementById('pageInfo').textContent = `Page ${currentPage} of ${pages}  (${total} results)`;
+    }
+
+    function changePage(dir) {
+        const pages = Math.ceil(filteredTxns.length / PAGE_SIZE);
+        currentPage = Math.max(1, Math.min(pages, currentPage + dir));
+        renderPage();
+        document.getElementById('historySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function formatDate(raw) {
+        if (!raw) return '—';
+        const d = new Date(raw);
+        if (isNaN(d)) return raw;
+        return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+             + '  ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        window.location.href = '/';
+    }
+
+    // ── Init ──
+    loadAccounts();
+</script>
+</body>
+</html>

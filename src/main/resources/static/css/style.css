@@ -1,0 +1,117 @@
+body {
+    margin: 0;
+    font-family: 'Segoe UI';
+    background: #f5f6fa;
+}
+
+.navbar {
+    background: #002970;
+    color: white;
+    padding: 15px;
+    font-size: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.container {
+    padding: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin: 15px 0;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.balance {
+    background: linear-gradient(to right, #00c6ff, #0072ff);
+    color: white;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+}
+
+button {
+    padding: 10px;
+    background: #0072ff;
+    color: white;
+    border: none;
+    width: 100%;
+    border-radius: 8px;
+}
+
+body {
+    margin: 0;
+    font-family: Arial;
+    background: linear-gradient(to right, #0072ff, #00c6ff);
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.login-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    width: 300px;
+    text-align: center;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background: #0072ff;
+    color: white;
+    border: none;
+    margin-top: 10px;
+    border-radius: 8px;
+}
+
+.secondary {
+    background: gray;
+}
+
+.error {
+    color: red;
+    margin-top: 10px;
+}
+
+
+.account-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.account-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.delete-btn {
+  background: red;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.delete-btn:hover {
+  background: darkred;
+}
