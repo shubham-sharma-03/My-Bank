@@ -64,6 +64,7 @@ public class AuthController {
                     dbUser.getRole().name()
             );
 
+
             Map<String, Object> response = new HashMap<>();
             response.put("token", token);
             response.put("userId", dbUser.getId());
