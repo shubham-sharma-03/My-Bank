@@ -71,9 +71,5 @@ public class AccountController {
         return ResponseEntity.ok(transactionService.transfer(from, to, amount, userId));
     }
 
-    @DeleteMapping("/delete/{accountNumber}")
-    public ResponseEntity<String> deleteAccount(@PathVariable String accountNumber) {
-        accountService.deleteAccount(accountNumber);
-        return ResponseEntity.ok("Account deleted successfully");
-    }
+
 }
