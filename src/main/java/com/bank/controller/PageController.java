@@ -11,6 +11,7 @@ public class PageController {
         return "forward:/index.html";
     }
 
+
     @GetMapping("/dashboard")
     public String dashboard() {
         return "forward:/dashboard.html";
