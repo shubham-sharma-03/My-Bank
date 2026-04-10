@@ -85,12 +85,9 @@ public class AccountService {
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        // Optional: prevent deleting account with balance
-        if (account.getBalance() != null && account.getBalance().compareTo(BigDecimal.ZERO) > 0) {
-            throw new RuntimeException("Account must be empty before deletion");
-        }
 
-        accountRepository.delete(account);
+
+
     }
 
 }
