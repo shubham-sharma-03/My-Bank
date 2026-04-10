@@ -1,5 +1,6 @@
 package com.bank.controller;
 
+
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -10,7 +11,6 @@ public class PageController {
     public String home() {
         return "forward:/index.html";
     }
-
 
     @GetMapping("/dashboard")
     public String dashboard() {
