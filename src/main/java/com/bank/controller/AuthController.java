@@ -25,7 +25,7 @@ public class AuthController {
 
     private BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    // ✅ REGISTER
+    // REGISTER
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
         try {
@@ -42,7 +42,7 @@ public class AuthController {
         }
     }
 
-    // ✅ LOGIN (NO MORE 500 ERROR)
+    //  LOGIN 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
