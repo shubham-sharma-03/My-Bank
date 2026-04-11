@@ -7,6 +7,7 @@ public class AccountRequest {
     private String accountType;
     private BigDecimal initialBalance;  // ✅ must match exactly
 
+
     // Getters
     public Long getUserId() { return userId; }
     public String getAccountType() { return accountType; }
