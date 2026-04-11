@@ -20,10 +20,10 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
-    @Autowired                          // ✅ Fix 1: was missing @Autowired
+    @Autowired                          
     private AccountRepository accountRepository;
 
-    @Autowired                          // ✅ Fix 2: txnRepo was never declared
+    @Autowired                          
     private TransactionRepository txnRepo;
 
     @PostMapping("/transfer")
@@ -46,13 +46,13 @@ public class TransactionController {
         }
     }
 
-    @GetMapping("/user/{userId}")       // ✅ renamed from /all to /user (matches frontend)
+    @GetMapping("/user/{userId}")       
     public ResponseEntity<?> getAllTransactions(@PathVariable Long userId) {
         try {
             List<Account> accounts = accountRepository.findByUserId(userId);
 
             if (accounts.isEmpty()) {
-                return ResponseEntity.ok(List.of()); // return empty list, not 500
+                return ResponseEntity.ok(List.of()); 
             }
 
             List<String> accountNumbers = accounts.stream()
