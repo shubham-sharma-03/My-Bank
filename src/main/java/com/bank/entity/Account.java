@@ -34,7 +34,7 @@ public class Account {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore  // ✅ ignore user to avoid circular reference, but keep other fields
+    @JsonIgnore 
     private User user;
     public Account() {
     }
