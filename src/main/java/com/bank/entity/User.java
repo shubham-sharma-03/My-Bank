@@ -32,33 +32,46 @@ public class User {
 
     // ===== GETTERS =====
 
-    public Long getId() { return id; }
+    public Long getId() {
+        return id; }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name; }
 
-    public String getEmail() { return email; }
+    public String getEmail() {
+        return email; }
 
-    public String getPassword() { return password; }
+    public String getPassword() {
+        return password; }
 
-    public boolean isKycStatus() { return kycStatus; }
+    public boolean isKycStatus() {
+        return kycStatus; }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt; }
 
-    public Role getRole() { return role; }
+    public Role getRole() { 
+        return role; }
 
     // ===== SETTERS =====
 
-    public void setId(Long id) { this.id = id; }
+    public void setId(Long id) {
+        this.id = id; }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) { 
+        this.name = name; }
 
-    public void setEmail(String email) { this.email = email; }
+    public void setEmail(String email) {
+        this.email = email; }
 
-    public void setPassword(String password) { this.password = password; }
+    public void setPassword(String password) {
+        this.password = password; }
 
-    public void setKycStatus(boolean kycStatus) { this.kycStatus = kycStatus; }
+    public void setKycStatus(boolean kycStatus) { 
+        this.kycStatus = kycStatus; }
 
-    public void setRole(Role role) { this.role = role; }
+    public void setRole(Role role) { 
+        this.role = role; }
 
 
 }
