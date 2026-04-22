@@ -28,6 +28,5 @@ public class AuthService {
         user.setKycStatus(false);
 
         return userRepository.save(user);
-
     }
 }
