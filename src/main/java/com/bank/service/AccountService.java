@@ -76,6 +76,7 @@ public class AccountService {
         return account;
     }
 
+    // 📜 GET USER ACCOUNTS
     public List<Account> getAccountsByUserId(Long userId) {
         return accountRepository.findByUserId(userId);
     }
@@ -83,9 +84,6 @@ public class AccountService {
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
-
-
-
 
     }
 
