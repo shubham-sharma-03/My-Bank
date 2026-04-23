@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.List;
 
-
 @Service
 public class TransactionService {
 
@@ -22,7 +21,6 @@ public class TransactionService {
     @Autowired
     private TransactionRepository txnRepo;
     private Account sender;
-
 
     public List<Transaction> getHistory(String accountNumber) {
         return txnRepo.findBySenderAccountOrReceiverAccount(accountNumber, accountNumber);
@@ -61,7 +59,6 @@ public class TransactionService {
         txn.setAmount(amount);
         txn.setType(TransactionType.TRANSFER);
         txn.setStatus(TransactionStatus.COMPLETED);
-
         txnRepo.save(txn);
 
         return "Transfer successful";
