@@ -1,195 +1,206 @@
 let userAccounts = [];
 let activeAccount = null;
-let accountsLoaded = false;
 
 const token = localStorage.getItem('token');
 const currentUserId = localStorage.getItem('userId');
 
-// 📦 LOAD ACCOUNTS (✅ FIXED)
+// 📦 LOAD ACCOUNTS
 async function loadAccounts() {
+    try {
+        const res = await fetch(`/api/accounts/user/${currentUserId}`, {
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
 
-```
-if (!currentUserId) {
-    document.getElementById('accounts').innerHTML =
-        `<div class="no-accounts">
-            <div style="font-size:32px">⚠️</div>
-            <p>Session expired — please log in again</p>
-        </div>`;
-    return;
-}
+        const data = await res.json();
+        userAccounts = data;
 
-try {
-    const res = await fetch(`/api/accounts/user/${currentUserId}`, {
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
+        let html = '';
+        let totalBalance = 0;
 
-    const data = await res.json();
+        data.forEach(acc => {
+            totalBalance += Number(acc.balance);
 
-    userAccounts = data;
-    accountsLoaded = true;
-
-    let total = 0;
-    let html = '';
-
-    data.forEach(acc => {
-        total += Number(acc.balance);
-
-        html += `
-        <div class="account-item">
-
-            <div class="acc-left">
-                <div class="acc-icon">💳</div>
-                <div>
-                    <div class="acc-number">${acc.accountNumber}</div>
-                    <div class="acc-type">${acc.accountType || 'Savings'}</div>
+            html += `
+            <div class="account-item" onclick="selectAccount('${acc.accountNumber}')">
+                <div class="acc-left">
+                    <div class="acc-icon">💳</div>
+                    <div>
+                        <div class="acc-number">${acc.accountNumber}</div>
+                        <div class="acc-type">${acc.accountType}</div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="account-actions">
                 <div class="acc-bal">
                     ₹${Number(acc.balance).toLocaleString('en-IN')}
                 </div>
+            </div>`;
+        });
 
-                <!-- ✅ DELETE BUTTON -->
-                <button class="delete-btn"
-                    onclick="deleteAccount('${acc.accountNumber}', event)">
-                    ❌
-                </button>
-            </div>
+        document.getElementById('accounts').innerHTML = html;
+        document.getElementById('totalBalance').textContent =
+            totalBalance.toLocaleString('en-IN');
 
-        </div>`;
-    });
+        if (data.length > 0) {
+            selectAccount(data[0].accountNumber);
+        }
 
-    document.getElementById('accounts').innerHTML = html;
-    document.getElementById('totalBalance').textContent = total.toLocaleString('en-IN');
-
-} catch (err) {
-    console.error(err);
-    document.getElementById('accounts').innerHTML = "Error loading accounts";
-}
-```
-
+    } catch (err) {
+        console.error(err);
+        alert("Error loading accounts");
+    }
 }
 
-// ❌ DELETE ACCOUNT (✅ FIXED)
-async function deleteAccount(accountNumber, e) {
+// 🎯 SELECT ACCOUNT
+function selectAccount(accountNumber) {
+    activeAccount = accountNumber;
+    document.getElementById("from").value = accountNumber;
 
-```
-if (e) e.stopPropagation();
-
-if (!confirm("Are you sure you want to delete this account?")) return;
-
-try {
-    const res = await fetch(`/api/accounts/delete/${accountNumber}`, {
-        method: "DELETE",
-        headers: { 'Authorization': 'Bearer ' + token }
-    });
-
-    const msg = await res.text();
-    alert(msg);
-
-    loadAccounts();
-
-} catch (err) {
-    console.error(err);
-    alert("Error deleting account");
-}
-```
-
+    loadTransactions(accountNumber);
 }
 
 // 💸 TRANSFER
 async function transfer() {
-const from = document.getElementById("from").value;
-const to = document.getElementById("to").value;
-const amount = document.getElementById("amount").value;
 
-```
-if (!from || !to || !amount) {
-    alert("Fill all fields");
-    return;
-}
+    const from = document.getElementById("from").value;
+    const to = document.getElementById("to").value;
+    const amount = document.getElementById("amount").value;
 
-try {
-    const res = await fetch('/api/transactions/transfer', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-            fromAccount: from,
-            toAccount: to,
-            amount: parseFloat(amount)
-        })
-    });
-
-    if (res.ok) {
-        alert("✅ Transfer Successful");
-        loadAccounts();
-    } else {
-        const msg = await res.text();
-        alert(msg);
+    if (!from || !to || !amount) {
+        alert("Fill all fields");
+        return;
     }
 
-} catch (err) {
-    console.error(err);
-    alert("Server error");
+    try {
+        const res = await fetch('/api/transactions/transfer', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+                fromAccount: from,
+                toAccount: to,
+                amount: parseFloat(amount),
+                userId: Number(currentUserId)
+            })
+        });
+
+        const msg = await res.text();
+
+        if (res.ok) {
+            alert(`💸 ₹${amount} sent from ${from}`);
+            alert(`✅ ₹${amount} received in ${to}`);
+
+            loadAccounts();
+            loadTransactions(from);
+        } else {
+            alert(msg);
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Server error");
+    }
 }
-```
 
-}
+// 📜 TRANSACTION HISTORY + GLOBAL TOTAL FIX
 
-// 📜 LOAD TRANSACTIONS
-async function loadTransactions(accountNumber) {
-try {
-const res = await fetch(`/api/transactions/history/${accountNumber}`, {
-headers: { 'Authorization': 'Bearer ' + token }
-});
+async function loadTransactions(filter = "all") {
 
-```
+    const res = await fetch(`/api/transactions/all/${currentUserId}`, {
+        headers: { 'Authorization': 'Bearer ' + token }
+    });
+
     const data = await res.json();
 
-    const container = document.getElementById("txnList");
-    if (!container) return;
+    let filtered = data;
 
+    if (filter === "sent") {
+        filtered = data.filter(txn =>
+            userAccounts.some(acc => acc.accountNumber === txn.senderAccount)
+        );
+    }
+
+    if (filter === "received") {
+        filtered = data.filter(txn =>
+            userAccounts.some(acc => acc.accountNumber === txn.receiverAccount)
+        );
+    }
+
+    const container = document.getElementById("txnList");
     container.innerHTML = "";
 
-    data.forEach(txn => {
+    if (!filtered.length) {
+        container.innerHTML = "<p>No transactions found</p>";
+        return;
+    }
+
+    filtered.forEach(txn => {
+
+        const isCredit = userAccounts.some(acc => acc.accountNumber === txn.receiverAccount);
+        const sign = isCredit ? "+" : "-";
+        const color = isCredit ? "lime" : "red";
+
         const div = document.createElement("div");
 
-        const isCredit = txn.receiverAccount === accountNumber;
-        const sign = isCredit ? "+" : "-";
-
         div.innerHTML = `
-            <div>
-                ${txn.senderAccount} → ${txn.receiverAccount}<br>
-                ${sign} ₹${txn.amount}
+            <div style="padding:10px;border-bottom:1px solid #333;">
+                <b>${txn.senderAccount} → ${txn.receiverAccount}</b><br/>
+                <span style="color:${color}">
+                    ${sign} ₹${txn.amount}
+                </span>
             </div>
         `;
 
         container.appendChild(div);
     });
-
-} catch (err) {
-    console.error(err);
 }
-```
+        // 🔥 GLOBAL TOTAL (ALL ACCOUNTS)
+        let totalSent = 0;
+        let totalReceived = 0;
 
+        userAccounts.forEach(acc => {
+            data.forEach(txn => {
+
+                if (txn.senderAccount === acc.accountNumber) {
+                    totalSent += Number(txn.amount);
+                }
+
+                if (txn.receiverAccount === acc.accountNumber) {
+                    totalReceived += Number(txn.amount);
+                }
+
+            });
+        });
+
+        document.getElementById("totalSent").textContent =
+            "₹" + totalSent.toLocaleString('en-IN');
+
+        document.getElementById("totalReceived").textContent =
+            "₹" + totalReceived.toLocaleString('en-IN');
+
+        document.getElementById("totalTransactions").textContent =
+            data.length;
+
+    } catch (err) {
+        console.error(err);
+        alert("Error loading transactions");
+    }
+}
+
+function showAll() {
+    loadTransactions(activeAccount, "all");
+}
+
+function showSent() {
+    loadTransactions(activeAccount, "sent");
+}
+
+function showReceived() {
+    loadTransactions(activeAccount, "received");
 }
 
 // 🚀 INIT
 window.onload = () => {
-loadAccounts();
+    loadAccounts();
 };
-
-<div style="display:flex; align-items:center; gap:10px;">
-    <div class="acc-bal">
-        ₹${Number(acc.balance).toLocaleString('en-IN')}
-    </div>
-
-    <button onclick="deleteAccount('${acc.accountNumber}', event)"
-        style="background:red; color:white; border:none; padding:5px 8px; border-radius:6px;">
-        ❌
-    </button>
-</div>
