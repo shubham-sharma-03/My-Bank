@@ -48,7 +48,6 @@ public class TransactionService {
         // 💸 update balances
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
-
         accountRepository.save(sender);
         accountRepository.save(receiver);
 
