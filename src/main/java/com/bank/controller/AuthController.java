@@ -72,7 +72,9 @@ public class AuthController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            
             return ResponseEntity.status(500).body("Login failed: " + e.getMessage());
+            
         }
     }
 }
