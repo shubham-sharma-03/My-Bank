@@ -12,8 +12,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .formLogin(form -> form.disable())        // ✅ removes the "Please sign in" page
-                .httpBasic(basic -> basic.disable())      // ✅ removes basic auth popup
+                .formLogin(form -> form.disable())        //  removes the "Please sign in" page
+                .httpBasic(basic -> basic.disable())      //  removes basic auth popup
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()
                 );
