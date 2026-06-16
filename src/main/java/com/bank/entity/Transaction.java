@@ -38,6 +38,7 @@ public class Transaction {
     public TransactionType getType() { return type; }
     public TransactionStatus getStatus() { return status; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    
 
     // ===== SETTERS =====
     public void setSenderAccount(String senderAccount) { this.senderAccount = senderAccount; }
