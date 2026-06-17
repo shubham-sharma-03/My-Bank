@@ -16,6 +16,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/auth")
+    
 public class AuthController {
 
     @Autowired private AuthService authService;
@@ -46,16 +47,19 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
         try {
+            
             Optional<User> optionalUser = userRepository.findByEmail(request.getEmail());
 
             if (optionalUser.isEmpty()) {
                 return ResponseEntity.badRequest().body("User not found");
+                
             }
 
             User dbUser = optionalUser.get();
 
             if (!encoder.matches(request.getPassword(), dbUser.getPassword())) {
                 return ResponseEntity.badRequest().body("Invalid password");
+                
             }
 
             String token = jwtUtil.generateToken(
@@ -64,6 +68,7 @@ public class AuthController {
             );
 
             Map<String, Object> response = new HashMap<>();
+            
             response.put("token", token);
             response.put("userId", dbUser.getId());
             response.put("email", dbUser.getEmail());
