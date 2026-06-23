@@ -17,7 +17,8 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/api/auth")
     
-public class AuthController {
+public class AuthController
+    {
 
     @Autowired private AuthService authService;
     @Autowired private UserRepository userRepository;
@@ -57,7 +58,8 @@ public class AuthController {
 
             User dbUser = optionalUser.get();
 
-            if (!encoder.matches(request.getPassword(), dbUser.getPassword())) {
+            if (!encoder.matches(request.getPassword(), dbUser.getPassword())) 
+            {
                 return ResponseEntity.badRequest().body("Invalid password");
                 
             }
