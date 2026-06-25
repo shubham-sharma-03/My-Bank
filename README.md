@@ -1,50 +1,223 @@
-# 🚀 MyBank - Digital Banking System
+# 🏦 MyBank - Secure Banking Application
 
-## 📌 Overview
+A full-stack **Monolithic Banking Application** built using **Java, Spring Boot, Spring Security, JWT, PostgreSQL, Thymeleaf, HTML, CSS, and JavaScript**. The application provides secure authentication, account management, money transfer, transaction tracking, and a modern banking dashboard.
 
-A secure backend banking system built using Spring Boot that simulates real-world banking operations like account creation, fund transfer, and authentication.
+---
 
-## 🛠️ Tech Stack
+## 🚀 Features
 
-* Java, Spring Boot
-* PostgreSQL
-* Spring Security (JWT)
-* Docker
+### 🔐 Authentication
 
-## ✨ Features
+- User Registration
+- Secure Login
+- JWT Authentication
+- Password Encryption using BCrypt
+- Session Management
 
-* JWT-based authentication
-* Role-based access (Admin/User)
-* Fund transfer with transaction history
-* Secure password hashing (BCrypt)
-* Input validation and exception handling
+### 💳 Banking Features
 
-## 🔗 API Endpoints
+- Create Bank Account
+- View Account Details
+- Money Transfer
+- Transaction History
+- Multiple Accounts Support
+- Real-time Balance Update
 
-* POST /auth/login
-* POST /accounts/create
-* POST /transactions/transfer
+### 📊 Dashboard
 
-## 📊 Performance
+- Total Balance Overview
+- Account Summary
+- Transfer Statistics
+- Active Accounts
+- Modern Banking Dashboard
 
-* Handles 10K+ records
-* Optimized DB queries using indexing
+### 🛡️ Security
 
-## 🧠 Architecture
+- Spring Security
+- JWT Authentication
+- Protected Routes
+- Role-Based Access
+- Secure REST APIs
 
-Client → Controller → Service → Repository → Database
+---
 
-## ▶️ Run Locally
+# 🛠️ Tech Stack
 
-1. Clone repo
-2. Configure PostgreSQL
-3. Run Spring Boot app
+## Backend
 
-## 📌 Future Improvements
+- Java 17
+- Spring Boot
+- Spring Security
+- Spring Data JPA
+- Hibernate
+- JWT Authentication
+- Maven
 
-* Add Kafka for async processing
-* Add monitoring/logging
+## Frontend
 
-## 🔗 GitHub Repository
+- Thymeleaf
+- HTML5
+- CSS3
+- JavaScript
 
-https://github.com/shubham-sharma-03/My-Bank
+## Database
+
+- PostgreSQL
+
+## Tools
+
+- IntelliJ IDEA
+- Postman
+- Git
+- GitHub
+
+---
+
+# 📂 Project Structure
+
+```
+banking-application
+│
+├── controller
+├── service
+├── repository
+├── entity
+├── dto
+├── security
+├── config
+├── templates
+├── static
+├── resources
+└── BankingApplication.java
+```
+
+---
+
+# ✨ Key Functionalities
+
+- User Authentication
+- Account Creation
+- Account Dashboard
+- Money Transfer
+- Transaction Management
+- Balance Calculation
+- JWT Token Security
+- Database CRUD Operations
+
+---
+
+# 📸 Screenshots
+
+## 🔐 Login Page
+
+<img width="100%" src="screenshots/login.png"/>
+
+---
+
+## 📊 Banking Dashboard
+
+<img width="100%" src="screenshots/dashboard.png"/>
+
+---
+
+## 💰 Money Transfer
+
+<img width="100%" src="screenshots/transfer.png"/>
+
+---
+
+# ▶️ Getting Started
+
+## Clone Repository
+
+```bash
+git clone https://github.com/shubham-sharma-03/banking-application.git
+```
+
+## Configure Database
+
+Update your PostgreSQL credentials inside:
+
+```
+application.yaml
+```
+
+Example
+
+```yaml
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bank_db
+    username: postgres
+    password: password
+```
+
+---
+
+Gmail = shubh@gmail.com
+password = 123456
+
+## Run Application
+
+```bash
+mvn spring-boot:run
+```
+
+Application starts on
+
+```
+http://localhost:8080
+```
+
+---
+
+# 📚 Concepts Used
+
+- Object-Oriented Programming
+- Spring Boot
+- Spring Security
+- JWT Authentication
+- REST APIs
+- JPA & Hibernate
+- PostgreSQL
+- MVC Architecture
+- Exception Handling
+
+---
+
+# 🔮 Future Enhancements
+
+- Card Management
+- Loan Management
+- Email Notifications
+- Admin Dashboard
+- Redis Caching
+- Docker Support
+- Kubernetes Deployment
+- Microservices Migration
+
+---
+
+# 👨‍💻 Author
+
+## Shubham Sharma
+
+Java Backend Developer
+
+### Skills
+
+- Java
+- Spring Boot
+- Spring Security
+- JWT
+- PostgreSQL
+- REST APIs
+- HTML
+- CSS
+- JavaScript
+- Git
+- GitHub
+
+---
+
+⭐ If you like this project, don't forget to give it a Star!
