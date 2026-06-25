@@ -1,4 +1,4 @@
-# 🏦 MyBank - Secure Banking Application
+<img width="1920" height="1020" alt="Screenshot 2026-06-25 214505" src="https://github.com/user-attachments/assets/f07c9580-6e9a-46f6-8c6d-7d92e340565a" /># 🏦 MyBank - Secure Banking Application
 
 A full-stack **Monolithic Banking Application** built using **Java, Spring Boot, Spring Security, JWT, PostgreSQL, Thymeleaf, HTML, CSS, and JavaScript**. The application provides secure authentication, account management, money transfer, transaction tracking, and a modern banking dashboard.
 
@@ -110,21 +110,17 @@ banking-application
 
 ## 🔐 Login Page
 
-<img width="100%" src="screenshots/login.png"/>
+<img width="1920" height="1020" alt="Screenshot 2026-06-25 214505" src="https://github.com/user-attachments/assets/21ccd197-4b08-401b-a95a-edf9041de98d" />
+/>
 
 ---
 
 ## 📊 Banking Dashboard
 
-<img width="100%" src="screenshots/dashboard.png"/>
+<img width="1920" height="1020" alt="Screenshot 2026-06-25 213758" src="https://github.com/user-attachments/assets/b6cf58a9-2a9a-424e-8191-4e3fb06d4d7d" />
 
 ---
 
-## 💰 Money Transfer
-
-<img width="100%" src="screenshots/transfer.png"/>
-
----
 
 # ▶️ Getting Started
 
@@ -149,6 +145,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/bank_db
     username: postgres
+
     password: password
 ```
 
@@ -197,6 +194,14 @@ http://localhost:8080
 - Microservices Migration
 
 ---
+##Links
+
+Connect With Me
+
+GitHub: https://github.com/shubham-sharma-03/My-Bank        
+LinkedIn: https://www.linkedin.com/in/shubhamsharma2004/
+
+----
 
 # 👨‍💻 Author
 
