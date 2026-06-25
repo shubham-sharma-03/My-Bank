@@ -1,4 +1,4 @@
-<img width="1920" height="1020" alt="Screenshot 2026-06-25 214505" src="https://github.com/user-attachments/assets/f07c9580-6e9a-46f6-8c6d-7d92e340565a" /># 🏦 MyBank - Secure Banking Application
+ 🏦 MyBank - Secure Banking Application
 
 A full-stack **Monolithic Banking Application** built using **Java, Spring Boot, Spring Security, JWT, PostgreSQL, Thymeleaf, HTML, CSS, and JavaScript**. The application provides secure authentication, account management, money transfer, transaction tracking, and a modern banking dashboard.
 
@@ -110,8 +110,8 @@ banking-application
 
 ## 🔐 Login Page
 
-<img width="1920" height="1020" alt="Screenshot 2026-06-25 214505" src="https://github.com/user-attachments/assets/21ccd197-4b08-401b-a95a-edf9041de98d" />
-/>
+<img width="1920" height="1020" alt="Screenshot 2026-06-25 214743" src="https://github.com/user-attachments/assets/ad1b0522-48d4-43cf-b77a-32b10706b018" />
+
 
 ---
 
