@@ -110,8 +110,7 @@ banking-application
 
 ## 🔐 Login Page
 
-<img width="1920" height="1020" alt="Screenshot 2026-06-25 214743" src="https://github.com/user-attachments/assets/ad1b0522-48d4-43cf-b77a-32b10706b018" />
-
+<img width="1920" height="1020" alt="Screenshot 2026-06-25 214743" src="https://github.com/user-attachments/assets/ab9b7045-d44c-45ba-95bd-ef8dbbc8f78f" />
 
 ---
 
