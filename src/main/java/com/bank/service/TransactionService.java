@@ -9,10 +9,12 @@ import com.bank.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
+<<<<<<< HEAD
 
+=======
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
 
 @Service
 public class TransactionService {
@@ -24,7 +26,10 @@ public class TransactionService {
     private TransactionRepository txnRepo;
     private Account sender;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
     public List<Transaction> getHistory(String accountNumber) {
         return txnRepo.findBySenderAccountOrReceiverAccount(accountNumber, accountNumber);
     }
@@ -51,7 +56,6 @@ public class TransactionService {
         // 💸 update balances
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
-
         accountRepository.save(sender);
         accountRepository.save(receiver);
 
@@ -62,7 +66,10 @@ public class TransactionService {
         txn.setAmount(amount);
         txn.setType(TransactionType.TRANSFER);
         txn.setStatus(TransactionStatus.COMPLETED);
+<<<<<<< HEAD
 
+=======
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
         txnRepo.save(txn);
 
         return "Transfer successful";

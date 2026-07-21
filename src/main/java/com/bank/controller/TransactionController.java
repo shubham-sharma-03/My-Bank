@@ -20,10 +20,17 @@ public class TransactionController {
     @Autowired
     private TransactionService transactionService;
 
+<<<<<<< HEAD
     @Autowired                          // ✅ Fix 1: was missing @Autowired
     private AccountRepository accountRepository;
 
     @Autowired                          // ✅ Fix 2: txnRepo was never declared
+=======
+    @Autowired                          
+    private AccountRepository accountRepository;
+
+    @Autowired                          
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
     private TransactionRepository txnRepo;
 
     @PostMapping("/transfer")
@@ -46,13 +53,21 @@ public class TransactionController {
         }
     }
 
+<<<<<<< HEAD
     @GetMapping("/user/{userId}")       // ✅ renamed from /all to /user (matches frontend)
+=======
+    @GetMapping("/user/{userId}")       
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
     public ResponseEntity<?> getAllTransactions(@PathVariable Long userId) {
         try {
             List<Account> accounts = accountRepository.findByUserId(userId);
 
             if (accounts.isEmpty()) {
+<<<<<<< HEAD
                 return ResponseEntity.ok(List.of()); // return empty list, not 500
+=======
+                return ResponseEntity.ok(List.of()); 
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
             }
 
             List<String> accountNumbers = accounts.stream()
@@ -68,6 +83,19 @@ public class TransactionController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Could not fetch transactions: " + e.getMessage());
         }
+<<<<<<< HEAD
+    }
+
+    @GetMapping("/history/{account}")
+    public ResponseEntity<?> getHistory(@PathVariable String account) {
+        try {
+            return ResponseEntity.ok(transactionService.getHistory(account));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Could not fetch history: " + e.getMessage());
+        }
+=======
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
     }
 
     @GetMapping("/history/{account}")

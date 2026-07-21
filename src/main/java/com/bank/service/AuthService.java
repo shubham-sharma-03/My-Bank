@@ -8,7 +8,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
-public class AuthService {
+public class AuthService
+    {
 
     @Autowired
     private UserRepository userRepository;
@@ -28,6 +29,6 @@ public class AuthService {
         user.setKycStatus(false);
 
         return userRepository.save(user);
-
+        
     }
 }

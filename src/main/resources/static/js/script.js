@@ -203,4 +203,8 @@ function showReceived() {
 // 🚀 INIT
 window.onload = () => {
     loadAccounts();
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
