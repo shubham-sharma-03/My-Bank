@@ -80,17 +80,10 @@ public class AccountService {
     public List<Account> getAccountsByUserId(Long userId) {
         return accountRepository.findByUserId(userId);
     }
+
     public void deleteAccount(String accountNumber) {
 
         Account account = accountRepository.findByAccountNumber(accountNumber)
                 .orElseThrow(() -> new RuntimeException("Account not found"));
-
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
     }
-
 }

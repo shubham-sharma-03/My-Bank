@@ -2,18 +2,20 @@ package com.bank.repository;
 
 import com.bank.entity.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Long>
-    {
-    
-    List<Transaction> findBySenderAccountOrReceiverAccount(String sender, String receiver);
-<<<<<<< HEAD
-    List<Transaction> findBySenderAccountInOrReceiverAccountIn(List<String> sender, List<String> receiver);
+@Repository
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+
+    List<Transaction> findBySenderAccountOrReceiverAccount(
+            String senderAccount,
+            String receiverAccount
+    );
+
+    List<Transaction> findBySenderAccountInOrReceiverAccountIn(
+            List<String> senderAccounts,
+            List<String> receiverAccounts
+    );
 }
-=======
-    
-    List<Transaction> findBySenderAccountInOrReceiverAccountIn(List<String> sender, List<String> receiver);
-    
-}
->>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9

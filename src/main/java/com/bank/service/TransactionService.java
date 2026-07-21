@@ -9,12 +9,9 @@ import com.bank.repository.TransactionRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.math.BigDecimal;
 import java.util.List;
-<<<<<<< HEAD
-
-=======
->>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
 
 @Service
 public class TransactionService {
@@ -24,12 +21,7 @@ public class TransactionService {
 
     @Autowired
     private TransactionRepository txnRepo;
-    private Account sender;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
     public List<Transaction> getHistory(String accountNumber) {
         return txnRepo.findBySenderAccountOrReceiverAccount(accountNumber, accountNumber);
     }
@@ -43,33 +35,27 @@ public class TransactionService {
         Account receiver = accountRepository.findByAccountNumber(toAcc)
                 .orElseThrow(() -> new RuntimeException("Receiver not found"));
 
-        // ❌ prevent same account transfer
         if (fromAcc.equals(toAcc)) {
             throw new RuntimeException("Cannot transfer to same account");
         }
 
-        // ❌ insufficient balance
         if (sender.getBalance().compareTo(amount) < 0) {
             throw new RuntimeException("Insufficient balance");
         }
 
-        // 💸 update balances
         sender.setBalance(sender.getBalance().subtract(amount));
         receiver.setBalance(receiver.getBalance().add(amount));
+
         accountRepository.save(sender);
         accountRepository.save(receiver);
 
-        // 🔥 FIXED TRANSACTION ENTRY
         Transaction txn = new Transaction();
-        txn.setSenderAccount(fromAcc);   // ✅ correct sender
-        txn.setReceiverAccount(toAcc);   // ✅ correct receiver
+        txn.setSenderAccount(fromAcc);
+        txn.setReceiverAccount(toAcc);
         txn.setAmount(amount);
         txn.setType(TransactionType.TRANSFER);
         txn.setStatus(TransactionStatus.COMPLETED);
-<<<<<<< HEAD
 
-=======
->>>>>>> c83069105790aa23d16c0be8bb0e18929901aae9
         txnRepo.save(txn);
 
         return "Transfer successful";
