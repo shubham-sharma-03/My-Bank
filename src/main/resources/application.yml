@@ -10,9 +10,6 @@ spring:
       ddl-auto: update
     show-sql: false
 
-  application:
-    name: banking-application
-
 server:
   port: ${PORT:8080}
 
