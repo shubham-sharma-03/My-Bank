@@ -1,13 +1,15 @@
-FROM eclipse-temurin:17-jdk
+# Build stage
+FROM eclipse-temurin:17-jdk AS builder
 
 WORKDIR /app
-
 COPY . .
+RUN chmod +x mvnw && ./mvnw clean package -DskipTests
 
-RUN chmod +x mvnw
+# Runtime stage
+FROM eclipse-temurin:17-jre
 
-RUN ./mvnw clean package -DskipTests
+WORKDIR /app
+COPY --from=builder /app/target/banking-application-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 8080
-
-ENTRYPOINT ["java","-jar","target/banking-application-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
