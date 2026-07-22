@@ -687,11 +687,18 @@
         document.getElementById('summaryCredit').textContent = '₹' + totalCredit.toLocaleString('en-IN');
     }
 
-    function isDebit(t) {
-        const userNums = userAccounts.map(a => a.accountNumber);
-        return userNums.includes(t.fromAccount || t.fromAccountNumber || '');
-    }
+    function isDebit(txn) {
 
+    const sender =
+        txn.senderAccount ||
+        txn.fromAccount ||
+        txn.fromAccountNumber;
+
+    return userAccounts.some(acc =>
+        acc.accountNumber === sender
+    );
+
+}
     // FIX: setFilter fully resets chip classes before applying the active one
     function setFilter(f) {
         currentFilter = f;
