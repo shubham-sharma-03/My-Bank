@@ -184,8 +184,9 @@ data.forEach(txn => {
 document.getElementById("totalSent").textContent =
     "₹" + totalSent.toLocaleString("en-IN");
 
+// If you want Total Transferred = Total Sent
 document.getElementById("totalReceived").textContent =
-    "₹" + totalReceived.toLocaleString("en-IN");
+    "₹" + totalSent.toLocaleString("en-IN");
 
 document.getElementById("totalTransactions").textContent =
     data.length;
