@@ -1,6 +1,10 @@
+* {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
-    font-family: 'Segoe UI';
+    font-family: 'Segoe UI', Arial, sans-serif;
     background: #f5f6fa;
 }
 
@@ -8,21 +12,27 @@ body {
     background: #002970;
     color: white;
     padding: 15px;
-    font-size: 20px;
+    font-size: 18px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
 .container {
-    padding: 20px;
+    padding: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 .card {
     background: white;
-    padding: 20px;
-    margin: 15px 0;
+    padding: 16px;
+    margin: 12px 0;
     border-radius: 12px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 100%;
 }
 
 .balance {
@@ -34,52 +44,36 @@ input {
     width: 100%;
     padding: 10px;
     margin: 8px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 16px; /* prevents iOS zoom on focus */
 }
 
 button {
-    padding: 10px;
+    padding: 12px;
     background: #0072ff;
     color: white;
     border: none;
     width: 100%;
     border-radius: 8px;
+    font-size: 16px;
 }
 
-body {
-    margin: 0;
-    font-family: Arial;
-    background: linear-gradient(to right, #0072ff, #00c6ff);
-}
-
-.container {
+.login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+    min-height: 100vh;
+    padding: 16px;
 }
 
 .login-card {
     background: white;
-    padding: 30px;
+    padding: 24px;
     border-radius: 12px;
-    width: 300px;
+    width: 100%;
+    max-width: 320px;
     text-align: center;
-}
-
-input {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-}
-
-button {
-    width: 100%;
-    padding: 10px;
-    background: #0072ff;
-    color: white;
-    border: none;
-    margin-top: 10px;
-    border-radius: 8px;
 }
 
 .secondary {
@@ -89,29 +83,32 @@ button {
 .error {
     color: red;
     margin-top: 10px;
+    font-size: 14px;
 }
 
-
 .account-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0;
 }
 
 .account-actions {
-  display: flex;
-  gap: 10px;
+    display: flex;
+    gap: 10px;
 }
 
 .delete-btn {
-  background: red;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 6px;
-  cursor: pointer;
+    background: red;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
 .delete-btn:hover {
-  background: darkred;
+    background: darkred;
 }
