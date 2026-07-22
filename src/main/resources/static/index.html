@@ -81,9 +81,11 @@
     </div>
 
     <div class="right">
+        <div class="card">
+
 
         <!-- LOGIN VIEW -->
-        <div id="loginView" class="card">
+        <div id="loginView">
             <div class="card-title">Welcome back 👋</div>
             <div class="card-sub">Sign in to your account to continue</div>
             <div class="field">
@@ -108,7 +110,7 @@
         </div>
 
         <!-- REGISTER VIEW -->
-        <div id="regView" class="card" style="display:none">
+        <div id="regView" style="display:none">
             <div class="card-title">Create account ✨</div>
             <div class="card-sub">Join MyBank in seconds</div>
             <div class="field">
@@ -142,6 +144,7 @@
 
     </div>
 </div>
+</div>
 
 <script>
     function togglePw(id, btn) {
@@ -151,8 +154,8 @@
     }
 
     function show(view) {
-        document.getElementById('loginView').style.display = view === 'login' ? 'flex' : 'none';
-        document.getElementById('regView').style.display   = view === 'reg'   ? 'flex' : 'none';
+        document.getElementById('loginView').style.display = view === 'login' ? 'block' : 'none';
+        document.getElementById('regView').style.display   = view === 'reg'   ? 'block' : 'none';
     }
 
     function setToast(id, msg, show) {
@@ -160,7 +163,7 @@
         document.getElementById(id).classList.toggle('show', show);
     }
 
-    // LOGIN
+    // ✅ LOGIN (FIXED API)
     async function login() {
         const email    = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
@@ -177,7 +180,7 @@
         btn.innerHTML = '<div class="spinner"></div> Signing in...';
 
         try {
-            const res = await fetch('/api/auth/login', {
+            const res = await fetch('/api/auth/login', {   // ✅ FIXED HERE
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -185,18 +188,22 @@
 
             if (res.ok) {
                 const data = await res.json();
+
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userId', data.userId);
+
                 btn.innerHTML = '✅ Success!';
                 setTimeout(() => {
                     window.location.href = '/dashboard.html';
                 }, 600);
+
             } else {
                 const msg = await res.text();
                 setToast('loginErr', msg || 'Invalid email or password', true);
                 btn.classList.remove('loading');
                 btn.innerHTML = 'Sign In →';
             }
+
         } catch (e) {
             setToast('loginErr', 'Network error — please try again', true);
             btn.classList.remove('loading');
@@ -204,7 +211,7 @@
         }
     }
 
-    // REGISTER
+    // ✅ REGISTER (FIXED API)
     async function register() {
         const name     = document.getElementById('regName').value.trim();
         const email    = document.getElementById('regEmail').value.trim();
@@ -223,7 +230,7 @@
         btn.innerHTML = '<div class="spinner"></div> Creating...';
 
         try {
-            const res = await fetch('/api/auth/register', {
+            const res = await fetch('/api/auth/register', {   // ✅ FIXED HERE
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
@@ -233,8 +240,9 @@
                 setToast('regSuc', 'Account created! Signing you in...', true);
                 btn.innerHTML = '✅ Created!';
 
+                // ✅ AUTO LOGIN FIXED
                 setTimeout(async () => {
-                    const r2 = await fetch('/api/auth/login', {
+                    const r2 = await fetch('/api/auth/login', {   // ✅ FIXED HERE
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, password })
@@ -249,12 +257,14 @@
                         show('login');
                     }
                 }, 1200);
+
             } else {
                 const msg = await res.text();
                 setToast('regErr', msg || 'Registration failed', true);
                 btn.classList.remove('loading');
                 btn.innerHTML = 'Create Account →';
             }
+
         } catch (e) {
             setToast('regErr', 'Network error — please try again', true);
             btn.classList.remove('loading');

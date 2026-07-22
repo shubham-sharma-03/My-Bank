@@ -1,170 +1,280 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyBank — Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/style.css">
-    <style>
-        /* ==========================
-           DASHBOARD STYLES
-        ========================== */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Sora', sans-serif; background: #0a1628; color: #ffffff; min-height: 100vh; }
-        .container { width: 95%; max-width: 1200px; margin: 20px auto; }
-        .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 24px; margin-bottom: 20px; backdrop-filter: blur(10px); }
-        .card h2 { font-size: 18px; font-weight: 600; margin-bottom: 16px; color: #8896b0; text-transform: uppercase; letter-spacing: 1px; }
+let userAccounts = [];
+let activeAccount = null;
 
-        /* Header */
-        .header { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 24px; }
-        .header .brand { display: flex; align-items: center; gap: 12px; font-size: 22px; font-weight: 700; }
-        .header .brand span { color: #00d4ff; }
-        .logout-btn { background: rgba(255,77,109,0.15); border: 1px solid rgba(255,77,109,0.3); color: #ff8099; padding: 10px 20px; border-radius: 10px; cursor: pointer; font-family: 'Sora', sans-serif; font-weight: 600; transition: 0.2s; }
-        .logout-btn:hover { background: rgba(255,77,109,0.25); }
+const token = localStorage.getItem('token');
+const currentUserId = localStorage.getItem('userId');
 
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px; text-align: center; }
-        .stat-card .stat-label { font-size: 12px; color: #8896b0; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
-        .stat-card .stat-value { font-size: 24px; font-weight: 700; }
-        .stat-card.sent .stat-value { color: #e53935; }
-        .stat-card.received .stat-value { color: #0aa84f; }
-        .stat-card.balance .stat-value { color: #1a6cff; }
-        .stat-card.count .stat-value { color: #00d4ff; }
+// 📦 LOAD ACCOUNTS
+async function loadAccounts() {
+try {
+const res = await fetch(`/api/accounts/user/${currentUserId}`, {
+headers: { 'Authorization': 'Bearer ' + token }
+});
 
-        /* Account List */
-        .account-item { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; transition: background 0.2s; border-radius: 8px; }
-        .account-item:hover { background: rgba(26,108,255,0.08); }
-        .account-item.active { background: rgba(26,108,255,0.12); border: 1px solid rgba(26,108,255,0.3); }
-        .acc-left { display: flex; align-items: center; gap: 12px; }
-        .acc-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #1a6cff, #00d4ff); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .acc-number { font-size: 15px; font-weight: 600; }
-        .acc-type { font-size: 12px; color: #8896b0; }
-        .acc-bal { font-size: 18px; font-weight: 700; color: #00d4ff; }
+if (!res.ok) {
+throw new Error("Failed to load accounts");
+}
 
-        /* Transfer Section */
-        .transfer-form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
-        .transfer-form .field { display: flex; flex-direction: column; gap: 6px; }
-        .transfer-form label { font-size: 12px; color: #8896b0; text-transform: uppercase; letter-spacing: 0.5px; }
-        .transfer-form input { padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: #fff; font-family: 'Sora', sans-serif; font-size: 14px; outline: none; }
-        .transfer-form input:focus { border-color: #1a6cff; background: rgba(26,108,255,0.08); }
-        .transfer-btn { padding: 12px 24px; background: linear-gradient(135deg, #1a6cff, #0052e0); border: none; border-radius: 10px; color: #fff; font-family: 'Sora', sans-serif; font-weight: 600; cursor: pointer; transition: transform 0.15s; box-shadow: 0 4px 20px rgba(26,108,255,0.3); }
-        .transfer-btn:hover { transform: translateY(-1px); }
+const data = await res.json();
+userAccounts = data;
 
-        /* Filter Buttons */
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 16px; }
-        .filter-btn { padding: 8px 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #8896b0; font-family: 'Sora', sans-serif; font-size: 13px; cursor: pointer; transition: 0.2s; }
-        .filter-btn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-        .filter-btn.active { background: rgba(26,108,255,0.2); border-color: rgba(26,108,255,0.4); color: #fff; }
+let html = '';
+let totalBalance = 0;
 
-        /* Transaction List */
-        .txn-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .txn-row:last-child { border-bottom: none; }
-        .txn-left { display: flex; align-items: center; gap: 12px; }
-        .txn-icon { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
-        .txn-icon.credit { background: rgba(10,168,79,0.15); }
-        .txn-icon.debit { background: rgba(229,57,53,0.15); }
-        .txn-info { display: flex; flex-direction: column; gap: 2px; }
-        .txn-accounts { font-size: 14px; font-weight: 500; }
-        .txn-date { font-size: 12px; color: #8896b0; }
-        .txn-right { text-align: right; }
-        .txn-amt { font-size: 16px; font-weight: 700; }
-        .txn-amt.credit { color: #0aa84f; }
-        .txn-amt.debit { color: #e53935; }
-        .txn-status { font-size: 11px; color: #8896b0; margin-top: 2px; }
+data.forEach(acc => {
+totalBalance += Number(acc.balance);
 
-        /* Empty State */
-        .empty-state { text-align: center; padding: 40px; color: #8896b0; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; }
-            .transfer-form { grid-template-columns: 1fr; }
-            .account-item { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .txn-row { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .txn-right { text-align: left; }
-        }
-    </style>
-</head>
-<body>
-
-<div class="container">
-    <!-- Header -->
-    <div class="header">
-        <div class="brand">🏦 My<span>Bank</span></div>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-
-    <!-- Stats Summary -->
-    <div class="stats-grid">
-        <div class="stat-card balance">
-            <div class="stat-label">Total Balance</div>
-            <div class="stat-value" id="totalBalance">₹0</div>
-        </div>
-        <div class="stat-card sent">
-            <div class="stat-label">Total Sent</div>
-            <div class="stat-value" id="totalSent">₹0</div>
-        </div>
-        <div class="stat-card received">
-            <div class="stat-label">Total Received</div>
-            <div class="stat-value" id="totalReceived">₹0</div>
-        </div>
-        <div class="stat-card count">
-            <div class="stat-label">Transactions</div>
-            <div class="stat-value" id="totalTransactions">0</div>
+html += `
+<div class="account-item" onclick="selectAccount('${acc.accountNumber}')">
+    <div class="acc-left">
+        <div class="acc-icon">💳</div>
+        <div>
+            <div class="acc-number">${acc.accountNumber}</div>
+            <div class="acc-type">${acc.accountType}</div>
         </div>
     </div>
 
-    <!-- Accounts Section -->
-    <div class="card">
-        <h2>Your Accounts</h2>
-        <div id="accounts">
-            <div class="empty-state">Loading accounts...</div>
-        </div>
+    <div class="acc-bal">
+        ₹${Number(acc.balance).toLocaleString('en-IN')}
     </div>
+</div>`;
+});
 
-    <!-- Transfer Section -->
-    <div class="card">
-        <h2>Transfer Money</h2>
-        <div class="transfer-form">
-            <div class="field">
-                <label>From Account</label>
-                <input type="text" id="from" placeholder="Select an account" readonly>
-            </div>
-            <div class="field">
-                <label>To Account</label>
-                <input type="text" id="to" placeholder="Enter account number">
-            </div>
-            <div class="field">
-                <label>Amount (₹)</label>
-                <input type="number" id="amount" placeholder="0.00">
-            </div>
-            <button class="transfer-btn" onclick="transfer()">Send →</button>
-        </div>
-    </div>
+document.getElementById('accounts').innerHTML = html;
+document.getElementById('totalBalance').textContent =
+totalBalance.toLocaleString('en-IN');
 
-    <!-- Transactions Section -->
-    <div class="card">
-        <h2>Transaction History</h2>
-        <div class="filter-bar">
-            <button class="filter-btn active" onclick="showAll()" id="btnAll">All</button>
-            <button class="filter-btn" onclick="showSent()" id="btnSent">Sent</button>
-            <button class="filter-btn" onclick="showReceived()" id="btnReceived">Received</button>
-        </div>
-        <div id="txnList">
-            <div class="empty-state">Loading transactions...</div>
-        </div>
+if (data.length > 0) {
+selectAccount(data[0].accountNumber);
+}
+
+} catch (err) {
+console.error(err);
+alert("Error loading accounts");
+}
+}
+
+// 🎯 SELECT ACCOUNT
+function selectAccount(accountNumber) {
+activeAccount = accountNumber;
+document.getElementById("from").value = accountNumber;
+
+loadTransactions("all");
+}
+
+// 💸 TRANSFER
+async function transfer() {
+const from = document.getElementById("from").value;
+const to = document.getElementById("to").value;
+const amount = document.getElementById("amount").value;
+
+if (!from || !to || !amount) {
+alert("Fill all fields");
+return;
+}
+
+try {
+const res = await fetch('/api/transactions/transfer', {
+method: 'POST',
+headers: {
+'Content-Type': 'application/json',
+'Authorization': 'Bearer ' + token
+},
+body: JSON.stringify({
+fromAccount: from,
+toAccount: to,
+amount: parseFloat(amount),
+userId: Number(currentUserId)
+})
+});
+
+const msg = await res.text();
+
+if (res.ok) {
+alert(`💸 ₹${amount} sent from ${from}`);
+alert(`✅ ₹${amount} received in ${to}`);
+
+await loadAccounts();
+await loadTransactions("all");
+} else {
+alert(msg);
+}
+
+} catch (err) {
+console.error(err);
+alert("Server error");
+}
+}
+
+// 📜 TRANSACTION HISTORY + GLOBAL TOTALS
+async function loadTransactions(filter = "all") {
+try {
+const res = await fetch(`/api/transactions/all/${currentUserId}`, {
+headers: { 'Authorization': 'Bearer ' + token }
+});
+
+if (!res.ok) {
+throw new Error("Failed to load transactions");
+}
+
+const data = await res.json();
+
+let filtered = data;
+
+if (filter === "sent") {
+filtered = data.filter(txn =>
+userAccounts.some(acc => acc.accountNumber === txn.senderAccount)
+);
+}
+
+if (filter === "received") {
+filtered = data.filter(txn =>
+userAccounts.some(acc => acc.accountNumber === txn.receiverAccount)
+);
+}
+
+const container = document.getElementById("txnList");
+
+if (!container) {
+console.error("txnList element not found");
+return;
+}
+
+container.innerHTML = "";
+
+if (!filtered.length) {
+container.innerHTML = "<p>No transactions found</p>";
+} else {
+filtered.forEach(txn => {
+
+const sender =
+txn.senderAccount ||
+txn.fromAccount ||
+txn.fromAccountNumber;
+
+const receiver =
+txn.receiverAccount ||
+txn.toAccount ||
+txn.toAccountNumber;
+
+const isCredit = userAccounts.some(acc =>
+acc.accountNumber === receiver
+);
+
+const sign = isCredit ? "+" : "-";
+
+const amtClass = isCredit ? "credit" : "debit";
+const icon = isCredit ? "⬇️" : "⬆️";
+const label = isCredit ? "Received" : "Sent";
+
+const dateStr = txn.timestamp
+? new Date(txn.timestamp).toLocaleString('en-IN', {
+day: '2-digit', month: 'short', year: 'numeric',
+hour: '2-digit', minute: '2-digit'
+})
+: '';
+
+const div = document.createElement("div");
+div.className = "txn-row";
+
+div.innerHTML = `
+<div class="txn-left">
+    <div class="txn-icon">${icon}</div>
+    <div class="txn-info">
+        <div class="txn-accounts">${label}</div>
+        <div class="txn-date">${sender} → ${receiver}${dateStr ? ' · ' + dateStr : ''}</div>
     </div>
 </div>
+<div class="txn-right">
+    <div class="txn-amount ${amtClass}">
+        ${sign} ₹${Number(txn.amount || 0).toLocaleString('en-IN')}
+    </div>
+</div>
+`;
 
-<script src="/js/dashboard.js"></script>
-<script>
-    function logout() {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userId');
-        window.location.href = '/';
-    }
-</script>
-</body>
-</html>
+container.appendChild(div);
+});
+
+// 🔥 DASHBOARD SUMMARY (always computed from full unfiltered data)
+let totalSent = 0;
+let totalReceived = 0;
+let sentCount = 0;
+let receivedCount = 0;
+
+data.forEach(txn => {
+const sender =
+txn.senderAccount ||
+txn.fromAccount ||
+txn.fromAccountNumber;
+
+const receiver =
+txn.receiverAccount ||
+txn.toAccount ||
+txn.toAccountNumber;
+
+const isSent = userAccounts.some(acc =>
+acc.accountNumber === sender
+);
+
+const isReceived = userAccounts.some(acc =>
+acc.accountNumber === receiver
+);
+
+if (isSent) {
+totalSent += Number(txn.amount || 0);
+sentCount++;
+}
+
+if (isReceived) {
+totalReceived += Number(txn.amount || 0);
+receivedCount++;
+}
+});
+
+const totalSentEl = document.getElementById("totalSent");
+if (totalSentEl) {
+totalSentEl.textContent = "₹" + totalSent.toLocaleString("en-IN");
+}
+
+const totalReceivedEl = document.getElementById("totalReceived");
+if (totalReceivedEl) {
+totalReceivedEl.textContent = "₹" + totalReceived.toLocaleString("en-IN");
+}
+
+const totalTransactionsEl = document.getElementById("totalTransactions");
+if (totalTransactionsEl) {
+totalTransactionsEl.textContent = data.length;
+}
+
+const sentCountEl = document.getElementById("sentCount");
+if (sentCountEl) {
+sentCountEl.textContent = sentCount;
+}
+
+const receivedCountEl = document.getElementById("receivedCount");
+if (receivedCountEl) {
+receivedCountEl.textContent = receivedCount;
+}
+
+} catch (err) {
+console.error(err);
+alert("Error loading transactions");
+}
+}
+
+function showAll() {
+loadTransactions("all");
+}
+
+function showSent() {
+loadTransactions("sent");
+}
+
+function showReceived() {
+loadTransactions("received");
+}
+
+// 🚀 INIT
+window.onload = () => {
+loadAccounts();
+};
