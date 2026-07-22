@@ -152,33 +152,53 @@ async function loadTransactions(filter = "all") {
         }
 
         // 🔥 GLOBAL TOTALS (ALL ACCOUNTS, ALWAYS FROM UNFILTERED DATA)
-        let totalSent = 0;
-        let totalReceived = 0;
+// 🔥 DASHBOARD SUMMARY
+let totalSent = 0;
+let totalReceived = 0;
 
-        userAccounts.forEach(acc => {
-            data.forEach(txn => {
-                if (txn.senderAccount === acc.accountNumber) {
-                    totalSent += Number(txn.amount);
-                }
-                if (txn.receiverAccount === acc.accountNumber) {
-                    totalReceived += Number(txn.amount);
-                }
-            });
-        });
+let sentCount = 0;
+let receivedCount = 0;
 
-        document.getElementById("totalSent").textContent =
-            "₹" + totalSent.toLocaleString('en-IN');
+data.forEach(txn => {
 
-        document.getElementById("totalReceived").textContent =
-            "₹" + totalReceived.toLocaleString('en-IN');
+    const isSent = userAccounts.some(acc =>
+        acc.accountNumber === txn.senderAccount
+    );
 
-        document.getElementById("totalTransactions").textContent =
-            data.length;
+    const isReceived = userAccounts.some(acc =>
+        acc.accountNumber === txn.receiverAccount
+    );
 
-    } catch (err) {
-        console.error(err);
-        alert("Error loading transactions");
+    if (isSent) {
+        totalSent += Number(txn.amount);
+        sentCount++;
     }
+
+    if (isReceived) {
+        totalReceived += Number(txn.amount);
+        receivedCount++;
+    }
+
+});
+
+document.getElementById("totalSent").textContent =
+    "₹" + totalSent.toLocaleString("en-IN");
+
+document.getElementById("totalReceived").textContent =
+    "₹" + totalReceived.toLocaleString("en-IN");
+
+document.getElementById("totalTransactions").textContent =
+    data.length;
+
+// Update counts if these elements exist
+const sentCountEl = document.getElementById("sentCount");
+if (sentCountEl) {
+    sentCountEl.textContent = sentCount;
+}
+
+const receivedCountEl = document.getElementById("receivedCount");
+if (receivedCountEl) {
+    receivedCountEl.textContent = receivedCount;
 }
 
 function showAll() {
