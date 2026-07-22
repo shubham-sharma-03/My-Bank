@@ -151,55 +151,61 @@ async function loadTransactions(filter = "all") {
             });
         }
 
-        // 🔥 GLOBAL TOTALS (ALL ACCOUNTS, ALWAYS FROM UNFILTERED DATA)
-// 🔥 DASHBOARD SUMMARY
-let totalSent = 0;
-let totalReceived = 0;
+        // 🔥 DASHBOARD SUMMARY (always computed from full unfiltered data)
+        let totalSent = 0;
+        let totalReceived = 0;
+        let sentCount = 0;
+        let receivedCount = 0;
 
-let sentCount = 0;
-let receivedCount = 0;
+        data.forEach(txn => {
+            const isSent = userAccounts.some(acc =>
+                acc.accountNumber === txn.senderAccount
+            );
 
-data.forEach(txn => {
+            const isReceived = userAccounts.some(acc =>
+                acc.accountNumber === txn.receiverAccount
+            );
 
-    const isSent = userAccounts.some(acc =>
-        acc.accountNumber === txn.senderAccount
-    );
+            if (isSent) {
+                totalSent += Number(txn.amount);
+                sentCount++;
+            }
 
-    const isReceived = userAccounts.some(acc =>
-        acc.accountNumber === txn.receiverAccount
-    );
+            if (isReceived) {
+                totalReceived += Number(txn.amount);
+                receivedCount++;
+            }
+        });
 
-    if (isSent) {
-        totalSent += Number(txn.amount);
-        sentCount++;
+        const totalSentEl = document.getElementById("totalSent");
+        if (totalSentEl) {
+            totalSentEl.textContent = "₹" + totalSent.toLocaleString("en-IN");
+        }
+
+        const totalReceivedEl = document.getElementById("totalReceived");
+        if (totalReceivedEl) {
+            totalReceivedEl.textContent = "₹" + totalReceived.toLocaleString("en-IN");
+        }
+
+        const totalTransactionsEl = document.getElementById("totalTransactions");
+        if (totalTransactionsEl) {
+            totalTransactionsEl.textContent = data.length;
+        }
+
+        const sentCountEl = document.getElementById("sentCount");
+        if (sentCountEl) {
+            sentCountEl.textContent = sentCount;
+        }
+
+        const receivedCountEl = document.getElementById("receivedCount");
+        if (receivedCountEl) {
+            receivedCountEl.textContent = receivedCount;
+        }
+
+    } catch (err) {
+        console.error(err);
+        alert("Error loading transactions");
     }
-
-    if (isReceived) {
-        totalReceived += Number(txn.amount);
-        receivedCount++;
-    }
-
-});
-
-document.getElementById("totalSent").textContent =
-    "₹" + totalSent.toLocaleString("en-IN");
-
-// If you want Total Transferred = Total Sent
-document.getElementById("totalReceived").textContent =
-    "₹" + totalSent.toLocaleString("en-IN");
-
-document.getElementById("totalTransactions").textContent =
-    data.length;
-
-// Update counts if these elements exist
-const sentCountEl = document.getElementById("sentCount");
-if (sentCountEl) {
-    sentCountEl.textContent = sentCount;
-}
-
-const receivedCountEl = document.getElementById("receivedCount");
-if (receivedCountEl) {
-    receivedCountEl.textContent = receivedCount;
 }
 
 function showAll() {
