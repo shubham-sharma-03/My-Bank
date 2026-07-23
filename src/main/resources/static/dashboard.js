@@ -114,6 +114,13 @@ async function loadTransactions(filter = "all") {
 
         const data = await res.json();
 
+        // Newest transactions first
+        data.sort((a, b) => {
+            const tA = a.timestamp ? new Date(a.timestamp).getTime() : (a.id || 0);
+            const tB = b.timestamp ? new Date(b.timestamp).getTime() : (b.id || 0);
+            return tB - tA;
+        });
+
         let filtered = data;
 
         if (filter === "sent") {
