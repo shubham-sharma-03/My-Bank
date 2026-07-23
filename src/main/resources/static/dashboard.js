@@ -10,12 +10,12 @@ async function loadAccounts() {
         const res = await fetch(`/api/accounts/user/${currentUserId}`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
+
         if (!res.ok) {
-        throw new Error("Failed to load accounts");
+            throw new Error("Failed to load accounts");
         }
 
         const data = await res.json();
-
         userAccounts = data;
 
         let html = '';
@@ -33,10 +33,7 @@ async function loadAccounts() {
                         <div class="acc-type">${acc.accountType}</div>
                     </div>
                 </div>
-
-                <div class="acc-bal">
-                    ₹${Number(acc.balance).toLocaleString('en-IN')}
-                </div>
+                <div class="acc-bal">₹${Number(acc.balance).toLocaleString('en-IN')}</div>
             </div>`;
         });
 
@@ -58,7 +55,6 @@ async function loadAccounts() {
 function selectAccount(accountNumber) {
     activeAccount = accountNumber;
     document.getElementById("from").value = accountNumber;
-
     loadTransactions("all");
 }
 
@@ -93,7 +89,6 @@ async function transfer() {
         if (res.ok) {
             alert(`💸 ₹${amount} sent from ${from}`);
             alert(`✅ ₹${amount} received in ${to}`);
-
             await loadAccounts();
             await loadTransactions("all");
         } else {
@@ -106,61 +101,75 @@ async function transfer() {
     }
 }
 
-// 📜 TRANSACTION HISTORY + GLOBAL TOTALS
+// 📜 TRANSACTION HISTORY + GLOBAL TOTALS  (renders into a <table class="txn-table">)
 async function loadTransactions(filter = "all") {
     try {
         const res = await fetch(`/api/transactions/all/${currentUserId}`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
 
-if (!res.ok) {
-    throw new Error("Failed to load transactions");
-}
+        if (!res.ok) {
+            throw new Error("Failed to load transactions");
+        }
 
-const data = await res.json();
+        const data = await res.json();
+
         let filtered = data;
 
         if (filter === "sent") {
             filtered = data.filter(txn =>
-                userAccounts.some(acc => acc.accountNumber === txn.senderAccount)
+                userAccounts.some(acc => acc.accountNumber === (txn.senderAccount || txn.fromAccount || txn.fromAccountNumber))
             );
         }
 
         if (filter === "received") {
             filtered = data.filter(txn =>
-                userAccounts.some(acc => acc.accountNumber === txn.receiverAccount)
+                userAccounts.some(acc => acc.accountNumber === (txn.receiverAccount || txn.toAccount || txn.toAccountNumber))
             );
         }
 
-        const container = document.getElementById("txnList");
-
-        if (!container) {
-            console.error("txnList element not found");
+        const tbody = document.getElementById("txnBody");
+        if (!tbody) {
+            console.error("txnBody element not found");
             return;
         }
 
-        container.innerHTML = "";
+        tbody.innerHTML = "";
 
         if (!filtered.length) {
-            container.innerHTML = "<p>No transactions found</p>";
+            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;color:#888;">No transactions found</td></tr>`;
         } else {
             filtered.forEach(txn => {
-                const isCredit = userAccounts.some(acc => acc.accountNumber === txn.receiverAccount);
+                const sender = txn.senderAccount || txn.fromAccount || txn.fromAccountNumber;
+                const receiver = txn.receiverAccount || txn.toAccount || txn.toAccountNumber;
+
+                const isCredit = userAccounts.some(acc => acc.accountNumber === receiver);
                 const sign = isCredit ? "+" : "-";
-                const color = isCredit ? "lime" : "red";
+                const amtClass = isCredit ? "credit" : "debit";
+                const label = isCredit ? "Received" : "Sent";
 
-                const div = document.createElement("div");
+                const dateStr = txn.timestamp
+                    ? new Date(txn.timestamp).toLocaleString('en-IN', {
+                        day: '2-digit', month: 'short', year: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                      })
+                    : '';
 
-                div.innerHTML = `
-                    <div style="padding:10px;border-bottom:1px solid #333;">
-                        <b>${txn.senderAccount} → ${txn.receiverAccount}</b><br/>
-                        <span style="color:${color}">
-                            ${sign} ₹${Number(txn.amount || 0).toLocaleString('en-IN')}
-                        </span>
-                    </div>
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td data-label="Transaction">
+                        <b>${label}</b><br/>
+                        <span style="font-size:12px;color:#888;">${dateStr}</span>
+                    </td>
+                    <td data-label="Accounts">
+                        <span class="txn-account-pill">${sender} → ${receiver}</span>
+                    </td>
+                    <td data-label="Amount" class="txn-amount ${amtClass}">
+                        ${sign} ₹${Number(txn.amount || 0).toLocaleString('en-IN')}
+                    </td>
                 `;
 
-                container.appendChild(div);
+                tbody.appendChild(tr);
             });
         }
 
@@ -171,26 +180,14 @@ const data = await res.json();
         let receivedCount = 0;
 
         data.forEach(txn => {
-            const sender =
-                txn.senderAccount ||
-                txn.fromAccount ||
-                txn.fromAccountNumber;
+            const sender = txn.senderAccount || txn.fromAccount || txn.fromAccountNumber;
+            const receiver = txn.receiverAccount || txn.toAccount || txn.toAccountNumber;
 
-            const receiver =
-                txn.receiverAccount ||
-                txn.toAccount ||
-                txn.toAccountNumber;
-
-            const isSent = userAccounts.some(acc =>
-                acc.accountNumber === sender
-            );
-
-            const isReceived = userAccounts.some(acc =>
-                acc.accountNumber === receiver
-            );
+            const isSent = userAccounts.some(acc => acc.accountNumber === sender);
+            const isReceived = userAccounts.some(acc => acc.accountNumber === receiver);
 
             if (isSent) {
-            totalSent += Number(txn.amount || 0);
+                totalSent += Number(txn.amount || 0);
                 sentCount++;
             }
 
@@ -201,29 +198,19 @@ const data = await res.json();
         });
 
         const totalSentEl = document.getElementById("totalSent");
-        if (totalSentEl) {
-            totalSentEl.textContent = "₹" + totalSent.toLocaleString("en-IN");
-        }
+        if (totalSentEl) totalSentEl.textContent = "₹" + totalSent.toLocaleString("en-IN");
 
         const totalReceivedEl = document.getElementById("totalReceived");
-        if (totalReceivedEl) {
-            totalReceivedEl.textContent = "₹" + totalReceived.toLocaleString("en-IN");
-        }
+        if (totalReceivedEl) totalReceivedEl.textContent = "₹" + totalReceived.toLocaleString("en-IN");
 
         const totalTransactionsEl = document.getElementById("totalTransactions");
-        if (totalTransactionsEl) {
-            totalTransactionsEl.textContent = data.length;
-        }
+        if (totalTransactionsEl) totalTransactionsEl.textContent = data.length;
 
         const sentCountEl = document.getElementById("sentCount");
-        if (sentCountEl) {
-            sentCountEl.textContent = sentCount;
-        }
+        if (sentCountEl) sentCountEl.textContent = sentCount;
 
         const receivedCountEl = document.getElementById("receivedCount");
-        if (receivedCountEl) {
-            receivedCountEl.textContent = receivedCount;
-        }
+        if (receivedCountEl) receivedCountEl.textContent = receivedCount;
 
     } catch (err) {
         console.error(err);

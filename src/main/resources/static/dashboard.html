@@ -1,280 +1,97 @@
-let userAccounts = [];
-let activeAccount = null;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyBank — Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-const token = localStorage.getItem('token');
-const currentUserId = localStorage.getItem('userId');
+<div class="container">
 
-// 📦 LOAD ACCOUNTS
-async function loadAccounts() {
-try {
-const res = await fetch(`/api/accounts/user/${currentUserId}`, {
-headers: { 'Authorization': 'Bearer ' + token }
-});
+    <!-- Total balance -->
+    <div class="card">
+        <div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Total Balance</div>
+        <div style="font-size:28px;font-weight:700;margin-top:6px;">₹<span id="totalBalance">0</span></div>
+    </div>
 
-if (!res.ok) {
-throw new Error("Failed to load accounts");
-}
+    <!-- Accounts -->
+    <div class="card">
+        <h3 style="margin-bottom:10px;">Your Accounts</h3>
+        <div id="accounts"><p style="color:#888;">Loading accounts…</p></div>
+    </div>
 
-const data = await res.json();
-userAccounts = data;
+    <!-- Transfer -->
+    <div class="card">
+        <h3 style="margin-bottom:10px;">Transfer Money</h3>
+        <label style="font-size:12px;color:#888;">From Account</label>
+        <input type="text" id="from" placeholder="Auto-filled from selection" readonly/>
+        <label style="font-size:12px;color:#888;">To Account</label>
+        <input type="text" id="to" placeholder="Recipient account number"/>
+        <label style="font-size:12px;color:#888;">Amount (₹)</label>
+        <input type="number" id="amount" placeholder="0.00" min="0" step="0.01"/>
+        <button onclick="transfer()">Send Money →</button>
+    </div>
 
-let html = '';
-let totalBalance = 0;
-
-data.forEach(acc => {
-totalBalance += Number(acc.balance);
-
-html += `
-<div class="account-item" onclick="selectAccount('${acc.accountNumber}')">
-    <div class="acc-left">
-        <div class="acc-icon">💳</div>
-        <div>
-            <div class="acc-number">${acc.accountNumber}</div>
-            <div class="acc-type">${acc.accountType}</div>
+    <!-- Summary -->
+    <div class="card" style="display:flex; gap:16px; flex-wrap:wrap;">
+        <div style="flex:1;min-width:140px;">
+            <div style="font-size:12px;color:#888;text-transform:uppercase;">Total Sent</div>
+            <div style="font-size:20px;font-weight:700;color:#e53935;" id="totalSent">₹0</div>
+            <div style="font-size:12px;color:#888;"><span id="sentCount">0</span> transactions</div>
+        </div>
+        <div style="flex:1;min-width:140px;">
+            <div style="font-size:12px;color:#888;text-transform:uppercase;">Total Received</div>
+            <div style="font-size:20px;font-weight:700;color:#0aa84f;" id="totalReceived">₹0</div>
+            <div style="font-size:12px;color:#888;"><span id="receivedCount">0</span> transactions</div>
+        </div>
+        <div style="flex:1;min-width:140px;">
+            <div style="font-size:12px;color:#888;text-transform:uppercase;">Total Transactions</div>
+            <div style="font-size:20px;font-weight:700;" id="totalTransactions">0</div>
         </div>
     </div>
 
-    <div class="acc-bal">
-        ₹${Number(acc.balance).toLocaleString('en-IN')}
+    <!-- Tabs -->
+    <div class="card" style="display:flex; gap:8px;">
+        <button id="tabAll" onclick="setTab('all')">All</button>
+        <button id="tabSent" onclick="setTab('sent')" style="background:#eee;color:#333;">Sent</button>
+        <button id="tabReceived" onclick="setTab('received')" style="background:#eee;color:#333;">Received</button>
     </div>
-</div>`;
-});
 
-document.getElementById('accounts').innerHTML = html;
-document.getElementById('totalBalance').textContent =
-totalBalance.toLocaleString('en-IN');
-
-if (data.length > 0) {
-selectAccount(data[0].accountNumber);
-}
-
-} catch (err) {
-console.error(err);
-alert("Error loading accounts");
-}
-}
-
-// 🎯 SELECT ACCOUNT
-function selectAccount(accountNumber) {
-activeAccount = accountNumber;
-document.getElementById("from").value = accountNumber;
-
-loadTransactions("all");
-}
-
-// 💸 TRANSFER
-async function transfer() {
-const from = document.getElementById("from").value;
-const to = document.getElementById("to").value;
-const amount = document.getElementById("amount").value;
-
-if (!from || !to || !amount) {
-alert("Fill all fields");
-return;
-}
-
-try {
-const res = await fetch('/api/transactions/transfer', {
-method: 'POST',
-headers: {
-'Content-Type': 'application/json',
-'Authorization': 'Bearer ' + token
-},
-body: JSON.stringify({
-fromAccount: from,
-toAccount: to,
-amount: parseFloat(amount),
-userId: Number(currentUserId)
-})
-});
-
-const msg = await res.text();
-
-if (res.ok) {
-alert(`💸 ₹${amount} sent from ${from}`);
-alert(`✅ ₹${amount} received in ${to}`);
-
-await loadAccounts();
-await loadTransactions("all");
-} else {
-alert(msg);
-}
-
-} catch (err) {
-console.error(err);
-alert("Server error");
-}
-}
-
-// 📜 TRANSACTION HISTORY + GLOBAL TOTALS
-async function loadTransactions(filter = "all") {
-try {
-const res = await fetch(`/api/transactions/all/${currentUserId}`, {
-headers: { 'Authorization': 'Bearer ' + token }
-});
-
-if (!res.ok) {
-throw new Error("Failed to load transactions");
-}
-
-const data = await res.json();
-
-let filtered = data;
-
-if (filter === "sent") {
-filtered = data.filter(txn =>
-userAccounts.some(acc => acc.accountNumber === txn.senderAccount)
-);
-}
-
-if (filter === "received") {
-filtered = data.filter(txn =>
-userAccounts.some(acc => acc.accountNumber === txn.receiverAccount)
-);
-}
-
-const container = document.getElementById("txnList");
-
-if (!container) {
-console.error("txnList element not found");
-return;
-}
-
-container.innerHTML = "";
-
-if (!filtered.length) {
-container.innerHTML = "<p>No transactions found</p>";
-} else {
-filtered.forEach(txn => {
-
-const sender =
-txn.senderAccount ||
-txn.fromAccount ||
-txn.fromAccountNumber;
-
-const receiver =
-txn.receiverAccount ||
-txn.toAccount ||
-txn.toAccountNumber;
-
-const isCredit = userAccounts.some(acc =>
-acc.accountNumber === receiver
-);
-
-const sign = isCredit ? "+" : "-";
-
-const amtClass = isCredit ? "credit" : "debit";
-const icon = isCredit ? "⬇️" : "⬆️";
-const label = isCredit ? "Received" : "Sent";
-
-const dateStr = txn.timestamp
-? new Date(txn.timestamp).toLocaleString('en-IN', {
-day: '2-digit', month: 'short', year: 'numeric',
-hour: '2-digit', minute: '2-digit'
-})
-: '';
-
-const div = document.createElement("div");
-div.className = "txn-row";
-
-div.innerHTML = `
-<div class="txn-left">
-    <div class="txn-icon">${icon}</div>
-    <div class="txn-info">
-        <div class="txn-accounts">${label}</div>
-        <div class="txn-date">${sender} → ${receiver}${dateStr ? ' · ' + dateStr : ''}</div>
+    <!-- Transaction history -->
+    <div class="card">
+        <h3 style="margin-bottom:10px;">Transaction History</h3>
+        <table class="txn-table">
+            <thead>
+            <tr>
+                <th>Transaction</th>
+                <th>Accounts</th>
+                <th>Amount</th>
+            </tr>
+            </thead>
+            <tbody id="txnBody">
+            <tr><td colspan="3" style="text-align:center;color:#888;">Loading transactions…</td></tr>
+            </tbody>
+        </table>
     </div>
+
 </div>
-<div class="txn-right">
-    <div class="txn-amount ${amtClass}">
-        ${sign} ₹${Number(txn.amount || 0).toLocaleString('en-IN')}
-    </div>
-</div>
-`;
 
-container.appendChild(div);
-});
+<script src="dashboard.js"></script>
+<script>
+    function setTab(which) {
+        document.getElementById('tabAll').style.background = which === 'all' ? '#0077ff' : '#eee';
+        document.getElementById('tabAll').style.color = which === 'all' ? '#fff' : '#333';
+        document.getElementById('tabSent').style.background = which === 'sent' ? '#0077ff' : '#eee';
+        document.getElementById('tabSent').style.color = which === 'sent' ? '#fff' : '#333';
+        document.getElementById('tabReceived').style.background = which === 'received' ? '#0077ff' : '#eee';
+        document.getElementById('tabReceived').style.color = which === 'received' ? '#fff' : '#333';
 
-// 🔥 DASHBOARD SUMMARY (always computed from full unfiltered data)
-let totalSent = 0;
-let totalReceived = 0;
-let sentCount = 0;
-let receivedCount = 0;
-
-data.forEach(txn => {
-const sender =
-txn.senderAccount ||
-txn.fromAccount ||
-txn.fromAccountNumber;
-
-const receiver =
-txn.receiverAccount ||
-txn.toAccount ||
-txn.toAccountNumber;
-
-const isSent = userAccounts.some(acc =>
-acc.accountNumber === sender
-);
-
-const isReceived = userAccounts.some(acc =>
-acc.accountNumber === receiver
-);
-
-if (isSent) {
-totalSent += Number(txn.amount || 0);
-sentCount++;
-}
-
-if (isReceived) {
-totalReceived += Number(txn.amount || 0);
-receivedCount++;
-}
-});
-
-const totalSentEl = document.getElementById("totalSent");
-if (totalSentEl) {
-totalSentEl.textContent = "₹" + totalSent.toLocaleString("en-IN");
-}
-
-const totalReceivedEl = document.getElementById("totalReceived");
-if (totalReceivedEl) {
-totalReceivedEl.textContent = "₹" + totalReceived.toLocaleString("en-IN");
-}
-
-const totalTransactionsEl = document.getElementById("totalTransactions");
-if (totalTransactionsEl) {
-totalTransactionsEl.textContent = data.length;
-}
-
-const sentCountEl = document.getElementById("sentCount");
-if (sentCountEl) {
-sentCountEl.textContent = sentCount;
-}
-
-const receivedCountEl = document.getElementById("receivedCount");
-if (receivedCountEl) {
-receivedCountEl.textContent = receivedCount;
-}
-
-} catch (err) {
-console.error(err);
-alert("Error loading transactions");
-}
-}
-
-function showAll() {
-loadTransactions("all");
-}
-
-function showSent() {
-loadTransactions("sent");
-}
-
-function showReceived() {
-loadTransactions("received");
-}
-
-// 🚀 INIT
-window.onload = () => {
-loadAccounts();
-};
+        if (which === 'all') showAll();
+        if (which === 'sent') showSent();
+        if (which === 'received') showReceived();
+    }
+</script>
+</body>
+</html>
