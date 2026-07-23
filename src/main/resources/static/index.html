@@ -83,67 +83,66 @@
     <div class="right">
         <div class="card">
 
+            <!-- LOGIN VIEW -->
+            <div id="loginView">
+                <div class="card-title">Welcome back 👋</div>
+                <div class="card-sub">Sign in to your account to continue</div>
+                <div class="field">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="loginEmail" placeholder="you@example.com"/>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="loginPassword" placeholder="Enter your password"/>
+                        <button class="toggle-pw" onclick="togglePw('loginPassword',this)" type="button">👁️</button>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="login()" id="loginBtn">Sign In →</button>
+                <div class="toast err" id="loginErr"><span>⚠️</span><span id="loginErrMsg"></span></div>
+                <div class="divider">or</div>
+                <button class="btn-secondary" onclick="show('reg')">Create a new account</button>
+            </div>
 
-        <!-- LOGIN VIEW -->
-        <div id="loginView">
-            <div class="card-title">Welcome back 👋</div>
-            <div class="card-sub">Sign in to your account to continue</div>
-            <div class="field">
-                <label>Email Address</label>
-                <div class="input-wrap">
-                    <span class="input-icon">✉️</span>
-                    <input type="email" id="loginEmail" placeholder="you@example.com"/>
+            <!-- REGISTER VIEW -->
+            <div id="regView" style="display:none">
+                <div class="card-title">Create account ✨</div>
+                <div class="card-sub">Join MyBank in seconds</div>
+                <div class="field">
+                    <label>Full Name</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">👤</span>
+                        <input type="text" id="regName" placeholder="Your full name"/>
+                    </div>
                 </div>
-            </div>
-            <div class="field">
-                <label>Password</label>
-                <div class="input-wrap">
-                    <span class="input-icon">🔒</span>
-                    <input type="password" id="loginPassword" placeholder="Enter your password"/>
-                    <button class="toggle-pw" onclick="togglePw('loginPassword',this)" type="button">👁️</button>
+                <div class="field">
+                    <label>Email Address</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="regEmail" placeholder="you@example.com"/>
+                    </div>
                 </div>
+                <div class="field">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="regPassword" placeholder="Choose a password"/>
+                        <button class="toggle-pw" onclick="togglePw('regPassword',this)" type="button">👁️</button>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="register()" id="regBtn">Create Account →</button>
+                <div class="toast err" id="regErr"><span>⚠️</span><span id="regErrMsg"></span></div>
+                <div class="toast suc" id="regSuc"><span>✅</span><span id="regSucMsg"></span></div>
+                <div class="divider">or</div>
+                <button class="btn-secondary" onclick="show('login')">Back to sign in</button>
             </div>
-            <button class="btn-primary" onclick="login()" id="loginBtn">Sign In →</button>
-            <div class="toast err" id="loginErr"><span>⚠️</span><span id="loginErrMsg"></span></div>
-            <div class="divider">or</div>
-            <button class="btn-secondary" onclick="show('reg')">Create a new account</button>
+
         </div>
-
-        <!-- REGISTER VIEW -->
-        <div id="regView" style="display:none">
-            <div class="card-title">Create account ✨</div>
-            <div class="card-sub">Join MyBank in seconds</div>
-            <div class="field">
-                <label>Full Name</label>
-                <div class="input-wrap">
-                    <span class="input-icon">👤</span>
-                    <input type="text" id="regName" placeholder="Your full name"/>
-                </div>
-            </div>
-            <div class="field">
-                <label>Email Address</label>
-                <div class="input-wrap">
-                    <span class="input-icon">✉️</span>
-                    <input type="email" id="regEmail" placeholder="you@example.com"/>
-                </div>
-            </div>
-            <div class="field">
-                <label>Password</label>
-                <div class="input-wrap">
-                    <span class="input-icon">🔒</span>
-                    <input type="password" id="regPassword" placeholder="Choose a password"/>
-                    <button class="toggle-pw" onclick="togglePw('regPassword',this)" type="button">👁️</button>
-                </div>
-            </div>
-            <button class="btn-primary" onclick="register()" id="regBtn">Create Account →</button>
-            <div class="toast err" id="regErr"><span>⚠️</span><span id="regErrMsg"></span></div>
-            <div class="toast suc" id="regSuc"><span>✅</span><span id="regSucMsg"></span></div>
-            <div class="divider">or</div>
-            <button class="btn-secondary" onclick="show('login')">Back to sign in</button>
-        </div>
-
     </div>
-</div>
 </div>
 
 <script>
@@ -163,7 +162,7 @@
         document.getElementById(id).classList.toggle('show', show);
     }
 
-    // ✅ LOGIN (FIXED API)
+    // ✅ LOGIN
     async function login() {
         const email    = document.getElementById('loginEmail').value.trim();
         const password = document.getElementById('loginPassword').value;
@@ -180,7 +179,7 @@
         btn.innerHTML = '<div class="spinner"></div> Signing in...';
 
         try {
-            const res = await fetch('/api/auth/login', {   // ✅ FIXED HERE
+            const res = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
@@ -189,8 +188,11 @@
             if (res.ok) {
                 const data = await res.json();
 
+                // Backend returns: { token, userId, email }
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userId', data.userId);
+                localStorage.setItem('email', data.email || email);
+                if (data.name) localStorage.setItem('name', data.name);
 
                 btn.innerHTML = '✅ Success!';
                 setTimeout(() => {
@@ -211,7 +213,7 @@
         }
     }
 
-    // ✅ REGISTER (FIXED API)
+    // ✅ REGISTER
     async function register() {
         const name     = document.getElementById('regName').value.trim();
         const email    = document.getElementById('regEmail').value.trim();
@@ -230,7 +232,7 @@
         btn.innerHTML = '<div class="spinner"></div> Creating...';
 
         try {
-            const res = await fetch('/api/auth/register', {   // ✅ FIXED HERE
+            const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })
@@ -240,9 +242,8 @@
                 setToast('regSuc', 'Account created! Signing you in...', true);
                 btn.innerHTML = '✅ Created!';
 
-                // ✅ AUTO LOGIN FIXED
                 setTimeout(async () => {
-                    const r2 = await fetch('/api/auth/login', {   // ✅ FIXED HERE
+                    const r2 = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, password })
@@ -252,6 +253,8 @@
                         const d = await r2.json();
                         localStorage.setItem('token', d.token);
                         localStorage.setItem('userId', d.userId);
+                        localStorage.setItem('email', d.email || email);
+                        localStorage.setItem('name', name);
                         window.location.href = '/dashboard.html';
                     } else {
                         show('login');

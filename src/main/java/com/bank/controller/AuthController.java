@@ -70,10 +70,11 @@ public class AuthController
             );
 
             Map<String, Object> response = new HashMap<>();
-            
+
             response.put("token", token);
             response.put("userId", dbUser.getId());
             response.put("email", dbUser.getEmail());
+            response.put("name", dbUser.getName());
 
             return ResponseEntity.ok(response);
 

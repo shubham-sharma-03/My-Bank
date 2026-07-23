@@ -34,7 +34,7 @@ public class Account {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore 
+    @JsonIgnore
     private User user;
     public Account() {
     }
@@ -59,4 +59,6 @@ public class Account {
     public BigDecimal getBalance() {
         return balance;
     }
+
+
 }
