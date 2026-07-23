@@ -104,7 +104,7 @@ async function transfer() {
 // 📜 TRANSACTION HISTORY + GLOBAL TOTALS  (renders into a <table class="txn-table">)
 async function loadTransactions(filter = "all") {
     try {
-        const res = await fetch(`/api/transactions/all/${currentUserId}`, {
+        const res = await fetch(`/api/transactions/user/${currentUserId}`, {
             headers: { 'Authorization': 'Bearer ' + token }
         });
 

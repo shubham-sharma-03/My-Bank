@@ -10,6 +10,15 @@
 
 <div class="container">
 
+    <!-- Top bar -->
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:34px;height:34px;border-radius:50%;background:#0077ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;" id="userAvatar">?</div>
+            <div style="font-weight:700;font-size:16px;">My<span style="color:#0077ff;">Bank</span></div>
+        </div>
+        <button onclick="logout()" style="background:transparent;color:#666;border:1px solid #ddd;padding:8px 14px;width:auto;">Logout</button>
+    </div>
+
     <!-- Total balance -->
     <div class="card">
         <div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Total Balance</div>
@@ -92,6 +101,21 @@
         if (which === 'sent') showSent();
         if (which === 'received') showReceived();
     }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userId');
+        window.location.href = '/index.html';
+    }
+
+    // Show first letter of email/userId in the avatar, if available
+    (function initAvatar() {
+        const email = localStorage.getItem('email');
+        const uid = localStorage.getItem('userId');
+        const letter = (email || uid || '?').toString().charAt(0).toUpperCase();
+        const el = document.getElementById('userAvatar');
+        if (el) el.textContent = letter;
+    })();
 </script>
 </body>
 </html>
