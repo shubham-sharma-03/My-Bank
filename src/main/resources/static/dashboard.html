@@ -11,17 +11,17 @@
 <div class="container">
 
     <!-- Top bar -->
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <div style="width:34px;height:34px;border-radius:50%;background:#0077ff;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;" id="userAvatar">?</div>
-            <div style="font-weight:700;font-size:16px;">My<span style="color:#0077ff;">Bank</span></div>
+    <div class="topbar">
+        <div class="topbar-left">
+            <div class="avatar" id="userAvatar">?</div>
+            <div class="brand-name">My<span>Bank</span></div>
         </div>
-        <button onclick="logout()" style="background:transparent;color:#666;border:1px solid #ddd;padding:8px 14px;width:auto;">Logout</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
 
     <!-- Total balance -->
     <div class="card">
-        <div style="font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;">Total Balance</div>
+        <div class="summary-label">Total Balance</div>
         <div style="font-size:28px;font-weight:700;margin-top:6px;">₹<span id="totalBalance">0</span></div>
     </div>
 
@@ -34,38 +34,42 @@
     <!-- Transfer -->
     <div class="card">
         <h3 style="margin-bottom:10px;">Transfer Money</h3>
-        <label style="font-size:12px;color:#888;">From Account</label>
+        <label>From Account</label>
         <input type="text" id="from" placeholder="Auto-filled from selection" readonly/>
-        <label style="font-size:12px;color:#888;">To Account</label>
+        <label>To Account</label>
         <input type="text" id="to" placeholder="Recipient account number"/>
-        <label style="font-size:12px;color:#888;">Amount (₹)</label>
+        <label>Amount (₹)</label>
         <input type="number" id="amount" placeholder="0.00" min="0" step="0.01"/>
         <button onclick="transfer()">Send Money →</button>
     </div>
 
     <!-- Summary -->
-    <div class="card" style="display:flex; gap:16px; flex-wrap:wrap;">
-        <div style="flex:1;min-width:140px;">
-            <div style="font-size:12px;color:#888;text-transform:uppercase;">Total Sent</div>
-            <div style="font-size:20px;font-weight:700;color:#e53935;" id="totalSent">₹0</div>
-            <div style="font-size:12px;color:#888;"><span id="sentCount">0</span> transactions</div>
-        </div>
-        <div style="flex:1;min-width:140px;">
-            <div style="font-size:12px;color:#888;text-transform:uppercase;">Total Received</div>
-            <div style="font-size:20px;font-weight:700;color:#0aa84f;" id="totalReceived">₹0</div>
-            <div style="font-size:12px;color:#888;"><span id="receivedCount">0</span> transactions</div>
-        </div>
-        <div style="flex:1;min-width:140px;">
-            <div style="font-size:12px;color:#888;text-transform:uppercase;">Total Transactions</div>
-            <div style="font-size:20px;font-weight:700;" id="totalTransactions">0</div>
+    <div class="card">
+        <div class="summary-grid">
+            <div class="summary-box">
+                <div class="summary-label">Total Sent</div>
+                <div class="summary-value sent" id="totalSent">₹0</div>
+                <div class="summary-sub"><span id="sentCount">0</span> transactions</div>
+            </div>
+            <div class="summary-box">
+                <div class="summary-label">Total Received</div>
+                <div class="summary-value received" id="totalReceived">₹0</div>
+                <div class="summary-sub"><span id="receivedCount">0</span> transactions</div>
+            </div>
+            <div class="summary-box">
+                <div class="summary-label">Total Transactions</div>
+                <div class="summary-value" id="totalTransactions">0</div>
+            </div>
         </div>
     </div>
 
     <!-- Tabs -->
-    <div class="card" style="display:flex; gap:8px;">
-        <button id="tabAll" onclick="setTab('all')">All</button>
-        <button id="tabSent" onclick="setTab('sent')" style="background:#eee;color:#333;">Sent</button>
-        <button id="tabReceived" onclick="setTab('received')" style="background:#eee;color:#333;">Received</button>
+    <div class="card">
+        <div class="tabs">
+            <button class="tab-btn active" id="tabAll" onclick="setTab('all')">All</button>
+            <button class="tab-btn" id="tabSent" onclick="setTab('sent')">Sent</button>
+            <button class="tab-btn" id="tabReceived" onclick="setTab('received')">Received</button>
+        </div>
     </div>
 
     <!-- Transaction history -->
@@ -87,15 +91,12 @@
 
 </div>
 
-<script src="dashboard.js"></script>
+<script src="/dashboard.js"></script>
 <script>
     function setTab(which) {
-        document.getElementById('tabAll').style.background = which === 'all' ? '#0077ff' : '#eee';
-        document.getElementById('tabAll').style.color = which === 'all' ? '#fff' : '#333';
-        document.getElementById('tabSent').style.background = which === 'sent' ? '#0077ff' : '#eee';
-        document.getElementById('tabSent').style.color = which === 'sent' ? '#fff' : '#333';
-        document.getElementById('tabReceived').style.background = which === 'received' ? '#0077ff' : '#eee';
-        document.getElementById('tabReceived').style.color = which === 'received' ? '#fff' : '#333';
+        document.getElementById('tabAll').classList.toggle('active', which === 'all');
+        document.getElementById('tabSent').classList.toggle('active', which === 'sent');
+        document.getElementById('tabReceived').classList.toggle('active', which === 'received');
 
         if (which === 'all') showAll();
         if (which === 'sent') showSent();
@@ -105,14 +106,18 @@
     function logout() {
         localStorage.removeItem('token');
         localStorage.removeItem('userId');
+        localStorage.removeItem('email');
+        localStorage.removeItem('name');
         window.location.href = '/index.html';
     }
 
-    // Show first letter of email/userId in the avatar, if available
+    // Show initial letter in the avatar — prefer name, then email, then userId as last resort
     (function initAvatar() {
+        const name = localStorage.getItem('name');
         const email = localStorage.getItem('email');
         const uid = localStorage.getItem('userId');
-        const letter = (email || uid || '?').toString().charAt(0).toUpperCase();
+        const source = name || email || uid || '?';
+        const letter = source.toString().trim().charAt(0).toUpperCase();
         const el = document.getElementById('userAvatar');
         if (el) el.textContent = letter;
     })();
